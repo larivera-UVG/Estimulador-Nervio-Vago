@@ -1,0 +1,1 @@
+# En este folder están los archivos asociados al Estimulador
