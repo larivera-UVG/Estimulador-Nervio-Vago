@@ -1,8 +1,19 @@
 
 //............................................................................................
 
-uint32_t sampleRate = 1000;//7692300;      //sample rate in milliseconds, determines how often TC5_Handler is called (in mili-Hertz)
 bool state = 0;
+ 
+// ............................. PWM and Timer Formulas ...........................................
+
+// PWM frequency:
+// freq = GCLKx_freq/(TCCx_Prescaler*(1+TOP_Value))
+// => Top_Value = (GCLKx_freq/TCCx_Prescaler*freq)-1
+
+// Timer value:
+// Time = (Timer_Presc*dfactor/GCLKx_freq)*(CCx+1)
+// => CCx = time*(GCLKx_freq/Timer_Presc*dfactor)-1
+
+// Note: dfactor is a scaling factor selected in clock divider to GCLKx configuration
 
 // ................................................................................................
 
@@ -24,30 +35,26 @@ const unsigned char PWM_pw[3][5] = {{47, 35, 23, 12, 6},   // 48MHz
 const unsigned int ON_OFF_TIME[14] = {18749, 9374, 5624, 3374, 2062, 1874, 1499, 937, 655, 562, 437, 218, 62, 30};
 
 
-// freq = GCLK4_freq/(TCC0_Prescaler*(1+TOP_Value))
 volatile unsigned int period = PWM_freq[0][5];
 volatile float pulse_width = period*0.5;
-volatile int ON_Time = ON_OFF_TIME[11];
-volatile int OFF_Time = ON_OFF_TIME[9];
+volatile int ON_Time = ON_OFF_TIME[13];
+volatile int OFF_Time = ON_OFF_TIME[13];
 
 // Select Gen Clock to setting the waveform generator clock or sample rate
 const unsigned char gClock = 4;
 
 // Set the divide factor for the Gen Clock, 48MHz/1 = 48MHz
-const unsigned char dFactor = 1;
+const unsigned char dFactor = 1; 
 
 void setup()
 {
 
-//............................................................................................
-
-//  tcConfigure(sampleRate);          //configure the timer to run at <sampleRate>Hertz
-//  tcStartCounter();                 //starts the timer
-
-//............................................................................................
-  
   pinMode(0, OUTPUT);
 
+
+//.............................. Configurare PWM (Stimulation signal) ..........................
+
+  
   // Enable and configure the Generic CLK Generator (GCLK)
   REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |               // Improve duty cycle 
                      GCLK_GENCTRL_GENEN |             // Enable GCLK
@@ -73,25 +80,20 @@ void setup()
   TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER(TCC_CTRLA_PRESCALER_DIV1024_Val);
   //TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV1;
 
-
   // Set Timer counter Mode to 16 bits
   TCC0->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;
-
 
   // Use Normal PWM (Single-slope): count up to PER, match on CC[n]
   TCC0->WAVE.reg = TCC_WAVE_WAVEGEN_NPWM;             // Select NPWM as waveform
   while (TCC0->SYNCBUSY.bit.WAVE);                    // Wait for synchronization
 
-
   // Set the period (TOP) before resetting timer
   TCC0->PER.reg = period;                              // Set the rate or frequency of PWM signal
   while (TCC0->SYNCBUSY.bit.PER);                      // Wait for synchronization
 
-
   // Set duty cycle where n for CC[n] is n = x % 4 and x is form WO[x]
   TCC0->CC[0].reg = pulse_width;                      // Set PWM signal to 50% of duty cicle 
   while (TCC0->SYNCBUSY.bit.CC0);                     // Wait for synchronization
-
 
   // Configure PA08 (D0 in Trinket) to be output
   PORT->Group[PORTA].DIRSET.reg = PORT_PA08;          // Set pin as output
@@ -105,9 +107,6 @@ void setup()
   // Even pin num (2*n): use PMUXE
   PORT->Group[PORTA].PMUX[4].reg = PORT_PMUX_PMUXE_E;
 
-  //PORT->Group[g_APinDescription[3].ulPort].PINCFG[g_APinDescription[3].ulPin].bit.PMUXEN = 1;
-  //PORT->Group[g_APinDescription[4].ulPort].PMUX[g_APinDescription[4].ulPin >> 1].reg = PORT_PMUX_PMUXO_F | PORT_PMUX_PMUXE_F;
-
 //  REG_TCC1_INTENSET = TCC_INTENSET_OVF;
 //  enable_interrupts();
 
@@ -118,18 +117,25 @@ void setup()
 //  TCC0->CTRLA.reg |= (TCC_CTRLA_ENABLE);              // Enable TCC1 output
 //  while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
 
-  tcConfigure(sampleRate);          //configure the timer to run at <sampleRate>Hertz
+
+//.............................. Configurar Timer (ON/OFF Time) ................................
+
+  tcConfigure();          //configure the timer to run at <sampleRate>Hertz
   tcStartCounter();    
 
-}
-
-
-void loop() {
+//..............................................................................................
 
 }
 
 
-//void enable_interrupts() {
+void loop() 
+{
+
+}
+
+
+//void enable_interrupts() 
+//{
 //  NVIC_SetPriority(TCC1_IRQn, 0);
 //  NVIC_EnableIRQ(TCC1_IRQn);   
 //}
@@ -143,86 +149,77 @@ void loop() {
 //  while (TCC1->SYNCBUSY.bit.CC1);
 //
 //  REG_TCC0_INTFLAG = TC_INTFLAG_OVF;
+//
 //}
-
-
 
 //............................................................................................
 
 
-
-
-//this function gets called by the interrupt at <sampleRate>Hertz
 void TC5_Handler (void) {
   
-  //**************** YOUR CODE HERE **************
-  if(state == true) {
+  if(state == true) 
+  {
+    // Enable TCC1 to start (Start PWM)
+    TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;         // Stop Timer to change to ON time value
+    while (tcIsSyncing());    
     
-  // Enable TCC1 to start (Start PWM)
-  TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
-  while (tcIsSyncing());
+    TCC0->CTRLA.reg |= (TCC_CTRLA_ENABLE);              // Enable TCC1 (Start PWM)
+    while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
   
-  TCC0->CTRLA.reg |= (TCC_CTRLA_ENABLE);              // Enable TCC1 output
-  while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
-
-  TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 timer counter based off of the system clock and the user defined sample rate or waveform
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
-  while (tcIsSyncing());
-
+    TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
+    TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;          // Enable Timer again 
+    while (tcIsSyncing());
+  } 
+    else 
+  {
+    TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;         // Stop Timer to change to OFF time value
+    while (tcIsSyncing());
+    
+    TCC0->CTRLA.reg &= (~TCC_CTRLA_ENABLE);             // Disable TCC1 (Stop PWM)
+    while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
+    digitalWrite(0, LOW);
   
-  } else {
-
-
-  TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
-  while (tcIsSyncing());
-  
-  // Disable TCC1 to stop (Stop PWM)
-  TCC0->CTRLA.reg &= (~TCC_CTRLA_ENABLE);             // Disable TCC1 output
-  while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
-  digitalWrite(0, LOW);
-
-  TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 timer counter based off of the system clock and the user defined sample rate or waveform
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
-  while (tcIsSyncing());
-  
+    TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)
+    TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;          // Enable Timer again 
+    while (tcIsSyncing()); 
   }
-  state = !state;
-  //************** END OF YOUR CODE **************
   
-  TC5->COUNT16.INTFLAG.bit.MC0 = 1; //Writing a 1 to INTFLAG.bit.MC0 clears the interrupt so that it will run again
+  state = !state;
+  TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag
 }
 
 
 
-void tcConfigure(int sampleRate)
+
+void tcConfigure()
 {
 
   // Enable and configure the Generic CLK Generator (GCLK)
-  REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |               // Improve duty cycle 
-                     GCLK_GENCTRL_GENEN |             // Enable GCLK
-                     GCLK_GENCTRL_SRC_OSC32K |        // Set the 32KHz as Clock Source
-                     GCLK_GENCTRL_ID(5);              // Select GCLK5 as ID 
-  while (GCLK->STATUS.bit.SYNCBUSY);                  // Wait for synchronization
-
+  REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |                 // Improve duty cycle 
+                     GCLK_GENCTRL_GENEN |               // Enable GCLK
+                     GCLK_GENCTRL_SRC_OSC32K |          // Set the 32KHz as Clock Source
+                     GCLK_GENCTRL_ID(5);                // Select GCLK5 as ID 
+  while (GCLK->STATUS.bit.SYNCBUSY);                    // Wait for synchronization
 
   // Select clock divider to GCLK5
-  REG_GCLK_GENDIV = GCLK_GENDIV_DIV(1) |              // Divide 32KHz by 1
-                    GCLK_GENDIV_ID(5);                // Apply it to GCLK5 
-  while (GCLK->STATUS.bit.SYNCBUSY);                  // Wait for synchronization
+  REG_GCLK_GENDIV = GCLK_GENDIV_DIV(1) |                // Divide 32KHz by 1
+                    GCLK_GENDIV_ID(5);                  // Apply it to GCLK5 
+  while (GCLK->STATUS.bit.SYNCBUSY);                    // Wait for synchronization
 
   // Enable GCLK0 and connect it to TC4 and TC5
-  REG_GCLK_CLKCTRL = GCLK_CLKCTRL_CLKEN |             // Enable Generic Clock 
-                     GCLK_CLKCTRL_GEN_GCLK5 |         // Select GCLK5
-                     GCLK_CLKCTRL_ID_TC4_TC5;         // Feed CLK5 to TC4 and TC5
-  while (GCLK->STATUS.bit.SYNCBUSY);                  // Wait for synchronization
+  REG_GCLK_CLKCTRL = GCLK_CLKCTRL_CLKEN |               // Enable Generic Clock 
+                     GCLK_CLKCTRL_GEN_GCLK5 |           // Select GCLK5
+                     GCLK_CLKCTRL_ID_TC4_TC5;           // Feed CLK5 to TC4 and TC5
+  while (GCLK->STATUS.bit.SYNCBUSY);                    // Wait for synchronization
  
   tcReset(); //reset TC5
 
   // Set TC5 Mode, WaveForm, Prescaler and Enable it 
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_MODE_COUNT16;                         // Set Timer counter Mode to 16 bits
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;                         // Set TC5 mode as match frequency
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1024 | TC_CTRLA_ENABLE;  // Set prescaler and enable TC5
-  TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;                             // Set TC5 timer counter based off of the system clock and the user defined sample rate or waveform
+  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_MODE_COUNT16;      // Set Timer counter mode to 16 bits
+  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;      // Set TC5 mode as match frequency
+  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1024; // Set prescaler to 1024
+  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;            // Enable TC5
+  TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;          // Set TC5 value with ON Time (Stimulation)
   while (tcIsSyncing());
   
   // Configure interrupt request
@@ -236,15 +233,14 @@ void tcConfigure(int sampleRate)
 } 
 
 
-//Function that is used to check if TC5 is done syncing
-//returns true when it is done syncing
+// Check if TC5 syncing is done (true)
 bool tcIsSyncing()
 {
   return TC5->COUNT16.STATUS.reg & TC_STATUS_SYNCBUSY;
 }
 
 
-//This function enables TC5 and waits for it to be ready
+// Enables TC5 and waits for it to be ready
 void tcStartCounter()
 {
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE; //set the CTRLA register
