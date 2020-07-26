@@ -16,7 +16,7 @@
 
 
 // Frequency configuration of the Stimulation Signal (PWM) for 30, 25, 20, 15, 10, 5, 2 and 1Hz  
-const unsigned int PWM_freq[3][8] = {{1561, 1874, 2343, 3124, 4687, 9374, 23437, 46874},    // 48MHz
+const unsigned int PWM_freq[3][8] = {{1562, 1874, 2343, 3124, 4687, 9374, 23437, 46874},    // 48MHz
                                      {2082, 2499, 3124, 4166, 6249, 12499, 31249, 62499},   // 8MHz
                                      {1066, 1279, 1599, 2132, 3199, 6399, 15999, 31999}};   // 32KHz
 
@@ -34,10 +34,10 @@ const unsigned int ON_OFF_TIME[14] = {18749, 9374, 5624, 3374, 2062, 1874, 1499,
 // ........................................ PWM and Timer Values Selection .............................................
 
 
-volatile unsigned int period = PWM_freq[0][0];
-volatile float pulse_width = period*0.5;  //PWM_pw[0][4];
+volatile unsigned int period = PWM_freq[0][5];
+volatile float pulse_width = period*0.5; //PWM_pw[2][4];       
 volatile int ON_Time = ON_OFF_TIME[13];
-volatile int OFF_Time = ON_OFF_TIME[12];
+volatile int OFF_Time = ON_OFF_TIME[13];
 
 
 // ............................... Variables for PWM, Timer and Digital Potentiometer ..................................
@@ -70,11 +70,11 @@ void setup()
   pinMode(INC, OUTPUT);             // 'INC
   pinMode(CS, OUTPUT);              // 'CS
   //analogWriteResolution(10);
-  digitalWrite(CS, HIGH);  
-  digitalWrite(INC, HIGH); 
   digitalWrite(UD, HIGH);
-
-  setResistance(61);
+  digitalWrite(INC, HIGH);
+  digitalWrite(CS, HIGH);  
+ 
+  setResistance(91);
 
 //...................................... Configurare PWM (Stimulation signal) ..........................................
 
@@ -88,17 +88,40 @@ void setup()
 
 // .....................................................................................................................
 
-  //DAC_Init();
+  //DAC_Init(); 
 
 }
 
 
 void loop() 
 {
-//  val = digitalRead(0);
-//  val1 = val*530;
-//  DAC->DATA.reg = (val1);                         // Write DAC value
-//  while(DAC->STATUS.reg & DAC_STATUS_SYNCBUSY);   // Make sure clock synchronization 
+//
+//  if(flag==1){
+//
+//    if(mode==1)
+//    {
+//      Timer_Disable();                                    // Stop Timer to change to ON time value       
+//      TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
+//      Timer_Start();                                      // Enable Timer again 
+//      PWM_Start();     
+//    }
+//    else if(mode==2)
+//    {
+//      Timer_Disable();                                    // Stop Timer to change to OFF time value
+//      TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
+//      Timer_Start();                                      // Enable Timer again  
+//      PWM_Stop();                                         // Disable PWM
+//      digitalWrite(0, LOW);            
+//    }
+//    else if(mode==3)
+//    {
+// 
+//    }
+//    
+//  }
+
+
+  
 }
 
 
@@ -159,16 +182,17 @@ void TC5_Handler (void) {
   {
     Timer_Disable();                                    // Stop Timer to change to ON time value       
     TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
-    Timer_Start();                                      // Enable Timer again 
     PWM_Start();                                        // Enable PWM 
+    Timer_Start();                                      // Enable Timer again     
   } 
     else 
   {
+    PWM_Stop();                                         // Disable PWM     
     Timer_Disable();                                    // Stop Timer to change to OFF time value
     TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
-    Timer_Start();                                      // Enable Timer again  
-    PWM_Stop();                                         // Disable PWM
-    digitalWrite(0, LOW);                   
+    Timer_Start();                                      // Enable Timer again 
+   
+    //digitalWrite(0, LOW);                   
   }  
   state = !state;                                       // ON Time <-> OFF Time
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag
@@ -183,46 +207,39 @@ void PWM_Config()
 {
 
   // Enable and configure the Generic CLK Generator (GCLK)
-  REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |               // Improve duty cycle 
-                     GCLK_GENCTRL_GENEN |             // Enable GCLK
-                     GCLK_GENCTRL_SRC_DFLL48M |       // Set the 48MHz as Clock Source
-                     GCLK_GENCTRL_ID(gClock);         // Select GCLK4 as ID 
-  while (GCLK->STATUS.bit.SYNCBUSY);                  // Wait for synchronization
-
+  REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |                   // Improve duty cycle 
+                     GCLK_GENCTRL_GENEN |                 // Enable GCLK
+                     GCLK_GENCTRL_SRC_DFLL48M |           // OSC32K | OSC8M | DFLL48M |   // Set the 48MHz as Clock Source
+                     GCLK_GENCTRL_ID(gClock);             // Select GCLK4 as ID 
+  while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
   // Select clock divider to GCLK4
-  REG_GCLK_GENDIV = GCLK_GENDIV_DIV(dFactor) |        // Divide 48MHz by 1
-                    GCLK_GENDIV_ID(gClock);           // Apply it to GCLK4 
-  while (GCLK->STATUS.bit.SYNCBUSY);                  // Wait for synchronization
-
-
+  REG_GCLK_GENDIV = GCLK_GENDIV_DIV(1) |                  // Divide 48MHz by 1 
+                    GCLK_GENDIV_ID(gClock);               // Apply it to GCLK4    
+  while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
+  
   // Enable GCLK4 and connect it to TCC0 and TCC1
-  REG_GCLK_CLKCTRL = GCLK_CLKCTRL_CLKEN |             // Enable Generic Clock 
-                     GCLK_CLKCTRL_GEN_GCLK4 |         // Select GCLK4
-                     GCLK_CLKCTRL_ID_TCC0_TCC1;       // Feed CLK4 to TCC0 and TCC1
-  while (GCLK->STATUS.bit.SYNCBUSY);                  // Wait for synchronization
+  REG_GCLK_CLKCTRL = GCLK_CLKCTRL_CLKEN |                 // Enable Generic Clock 
+                     GCLK_CLKCTRL_GEN_GCLK4 |             // Select GCLK4
+                     GCLK_CLKCTRL_ID_TCC0_TCC1;           // Feed CLK4 to TCC0 and TCC1
+  while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
-  TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER(TCC_CTRLA_PRESCALER_DIV1024_Val);    // Divide counter by 1 (This is N)
-  //TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV1;
+  TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV1024;         // Divide counter by 1 (This is N)
+  TCC0->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;               // Set Timer counter Mode to 16 bits
+  TCC0->WAVE.reg = TCC_WAVE_WAVEGEN_NPWM;                 // Select NPWM (Single-slope): count up to PER, match on CC[n]
+  while (TCC0->SYNCBUSY.bit.WAVE);                        // Wait for synchronization
 
-  TCC0->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;           // Set Timer counter Mode to 16 bits
-
-  TCC0->WAVE.reg = TCC_WAVE_WAVEGEN_NPWM;             // Select NPWM (Single-slope): count up to PER, match on CC[n]
-  while (TCC0->SYNCBUSY.bit.WAVE);                    // Wait for synchronization
-
-  TCC0->PER.reg = period;                              // Set the period (TOP) for rate or frequency of PWM signal
-  while (TCC0->SYNCBUSY.bit.PER);                      // Wait for synchronization
+  TCC0->PER.reg = period;                                 // Set the period (TOP) for rate or frequency of PWM signal
+  while (TCC0->SYNCBUSY.bit.PER);                         // Wait for synchronization
 
   // Set duty cycle where n for CC[n] is n = x % 4 and x is form WO[x]
-  TCC0->CC[0].reg = pulse_width;                      // Set PWM signal to 50% of duty cicle 
-  while (TCC0->SYNCBUSY.bit.CC0);                     // Wait for synchronization
+  TCC0->CC[0].reg = pulse_width;                          // Set PWM signal to 50% of duty cicle 
+  while (TCC0->SYNCBUSY.bit.CC0);                         // Wait for synchronization
 
   // Configure PA08 (D0 in Trinket) to be output
-  PORT->Group[PORTA].DIRSET.reg = PORT_PA08;          // Set pin as output
-  PORT->Group[PORTA].OUTCLR.reg = PORT_PA08;          // Set pin to low
-
-  // Enable the port multiplexer for PA08
-  PORT->Group[PORTA].PINCFG[8].reg |= PORT_PINCFG_PMUXEN;
+  PORT->Group[PORTA].DIRSET.reg = PORT_PA08;              // Set pin as output
+  PORT->Group[PORTA].OUTCLR.reg = PORT_PA08;              // Set pin to low
+  PORT->Group[PORTA].PINCFG[8].reg |= PORT_PINCFG_PMUXEN; // Enable the port multiplexer for PA08
 
   // Connet TCC1 timer to PA08. Function F is TCC1/WO[2] for PA08. Function E is TCC0/WO[0]
   // Odd pin num (2*n+1): use PMUXO
@@ -231,12 +248,6 @@ void PWM_Config()
 
 //  REG_TCC1_INTENSET = TCC_INTENSET_OVF;
 //  enable_interrupts();
-
-//// Enable TCC1 to start (Start PWM)
-//// REG_TCC1_CTRLA |= TCC_CTRLA_PRESCALER_DIV1 |        // Divide GCLK4 by 1
-////                    TCC_CTRLA_ENABLE;                 // Enable the TCC0 output
-//  TCC0->CTRLA.reg |= (TCC_CTRLA_ENABLE);              // Enable TCC1 output
-//  while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
   
 }
 
@@ -292,7 +303,7 @@ void Timer_Config()
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;      // Set TC5 mode as match frequency
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1024; // Set prescaler to 1024
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;            // Enable TC5
-  TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;          // Set TC5 value with ON Time (Stimulation)
+  TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;          // Set TC5 value with ON Time (Stimulation)
   while (tcIsSyncing());
   
   // Configure interrupt request
@@ -301,7 +312,7 @@ void Timer_Config()
   NVIC_SetPriority(TC5_IRQn, 0);
   NVIC_EnableIRQ(TC5_IRQn);
   
-  TC5->COUNT16.INTENSET.bit.MC0 = 1;           // Enable the TC5 interrupt request
+  TC5->COUNT16.INTENSET.bit.MC0 = 1;           // Enable TC5 Overflow Interrupt Request (OVF)
   while (tcIsSyncing());                       // Wait until TC5 is done syncing 
 } 
 
