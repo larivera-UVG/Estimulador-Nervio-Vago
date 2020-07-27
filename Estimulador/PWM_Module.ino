@@ -34,7 +34,7 @@ const unsigned int ON_OFF_TIME[14] = {18749, 9374, 5624, 3374, 2062, 1874, 1499,
 // ........................................ PWM and Timer Values Selection .............................................
 
 
-volatile unsigned int period = PWM_freq[0][5];
+volatile unsigned int period = PWM_freq[0][4];
 volatile float pulse_width = period*0.5; //PWM_pw[2][4];       
 volatile int ON_Time = ON_OFF_TIME[13];
 volatile int OFF_Time = ON_OFF_TIME[13];
@@ -55,7 +55,10 @@ const int UD = 1;
 const int INC = 2;
 const int CS = 3;
 
-int val, val1;
+bool flag=0;
+byte mode=0;
+int amplitude=0;
+int pulsos=0;
 
 // .....................................................................................................................
 
@@ -74,11 +77,12 @@ void setup()
   digitalWrite(INC, HIGH);
   digitalWrite(CS, HIGH);  
  
-  setResistance(91);
+  setResistance(0);
 
 //...................................... Configurare PWM (Stimulation signal) ..........................................
 
   PWM_Config();
+  Enable_PWM_Interrupts();  
   //PWM_Start();
 
 //...................................... Configurar Timer (ON/OFF Time) ................................................
@@ -93,35 +97,93 @@ void setup()
 }
 
 
+// .....................................................................................................................
+
+
 void loop() 
 {
-//
-//  if(flag==1){
-//
-//    if(mode==1)
-//    {
-//      Timer_Disable();                                    // Stop Timer to change to ON time value       
-//      TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
-//      Timer_Start();                                      // Enable Timer again 
-//      PWM_Start();     
-//    }
-//    else if(mode==2)
-//    {
-//      Timer_Disable();                                    // Stop Timer to change to OFF time value
-//      TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
-//      Timer_Start();                                      // Enable Timer again  
-//      PWM_Stop();                                         // Disable PWM
-//      digitalWrite(0, LOW);            
-//    }
-//    else if(mode==3)
-//    {
-// 
-//    }
-//    
-//  }
+
+  if(flag==1)
+  {
+     
+    switch (amplitude) 
+    { 
+      case 0:
+        setResistance(0);      
+        break;
+      case 1:
+        setResistance(8);
+        break;       
+      case 2:
+        setResistance(15);
+        break;       
+      case 3:
+        setResistance(23);
+        break;
+      case 4:
+        setResistance(30);
+        break;
+      case 5:
+        setResistance(38);
+        break;
+      case 6:
+        setResistance(45);
+        break; 
+      case 7:
+        setResistance(53);
+        break; 
+      case 8:
+        setResistance(61);
+        break;          
+      case 9:
+        setResistance(68);
+        break;  
+      case 10:
+        setResistance(76);
+        break; 
+      case 11:
+        setResistance(83);
+        break;
+      case 12:
+        setResistance(91);
+        break;
+      case 13:
+        setResistance(98);
+        break;                                          
+      default:
+        setResistance(98);
+        break;
+    }
+    flag=0;
+  }
+}
 
 
+// .....................................................................................................................
+
+
+void TCC0_Handler()
+{
+
+  if(mode==1)
+  {
+    amplitude++;     
+    if(amplitude>=11) amplitude=11;    
+    flag=1;  
+  } 
+  else if(mode==3)
+  {
+    amplitude--;     
+    if(amplitude<=0) amplitude=0;    
+    flag=1;     
+  }
+  else
+  {
+    //amplitude=10;
+    //flag=1;  
+  }
   
+  TCC0->INTFLAG.bit.MC0 = 1;                            // Clear interrupt flag
 }
 
 
@@ -156,17 +218,17 @@ void setResistance(int percent){
     
   for (int i=0; i<100; i++){            // Increment/Decrement Counter
     digitalWrite(INC, LOW);             // Low State (this gives a negative edge)
-    delayMicroseconds(1);               
+    delayMicroseconds(10);               
     digitalWrite(INC, HIGH);            // High State 
-    delayMicroseconds(1);
+    delayMicroseconds(10);
   }
 
   digitalWrite(UD, HIGH);               // Select Increment Counter
   for (int i=0; i<percent; i++){        // Increment/Decrement Counter
     digitalWrite(INC, LOW);             // Low State (this gives a negative edge)
-    delayMicroseconds(1);
+    delayMicroseconds(10);
     digitalWrite(INC, HIGH);            // High State 
-    delayMicroseconds(1);
+    delayMicroseconds(10);
   }
 
   digitalWrite(CS, HIGH);               // Save counter in non-volatile memory and enter in Stand-By Mode
@@ -177,26 +239,44 @@ void setResistance(int percent){
 
 
 void TC5_Handler (void) {
-  
-  if(state == true) 
+
+  mode++;                                               // Ramp Up -> ON Time -> Ramp Down -> OFF Time
+  if(mode>=5) mode=1;                                   // Reset Stimultation Sequence
+
+  if(mode == 1)
+  {
+    amplitude++;
+    flag=1;
+    Timer_Disable();                                    // Stop Timer to change to Ramp Up Time
+    TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with Ramp Up Time    
+    PWM_Start(); 
+    Timer_Start();                                      // Enable Timer again    
+  }
+  else if(mode == 2)
   {
     Timer_Disable();                                    // Stop Timer to change to ON time value       
     TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
-    PWM_Start();                                        // Enable PWM 
+    //PWM_Start();                                        // Enable PWM 
     Timer_Start();                                      // Enable Timer again     
   } 
-    else 
+  else if(mode == 3) 
+  {    
+    amplitude--;
+    flag=1;
+    Timer_Disable();                                    // Stop Timer to change to Ramp Down Time
+    TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with Ramp Down Time    
+    Timer_Start();                                      // Enable Timer again                   
+  }
+  else if(mode == 4)
   {
     PWM_Stop();                                         // Disable PWM     
-    Timer_Disable();                                    // Stop Timer to change to OFF time value
+    Timer_Disable();                                    // Stop Timer to change to OFF Time Value
     TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
-    Timer_Start();                                      // Enable Timer again 
-   
-    //digitalWrite(0, LOW);                   
-  }  
-  state = !state;                                       // ON Time <-> OFF Time
-  TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag
-  
+    Timer_Start();                                      // Enable Timer again    
+    //digitalWrite(0, LOW);     
+  }
+       
+  TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag  
 }
 
 
@@ -249,6 +329,22 @@ void PWM_Config()
 //  REG_TCC1_INTENSET = TCC_INTENSET_OVF;
 //  enable_interrupts();
   
+}
+
+
+// .....................................................................................................................
+
+
+void Enable_PWM_Interrupts(void)
+{
+  // Configure interrupt request
+  NVIC_DisableIRQ(TCC0_IRQn);                           // Deshabilitar interrupciones
+  NVIC_ClearPendingIRQ(TCC0_IRQn);                      // Limpiar banderas de interrupción
+  NVIC_SetPriority(TCC0_IRQn, 0);                       // Nivel de prioridad de la interrupción
+  NVIC_EnableIRQ(TCC0_IRQn);                            // Habilitar interrupciones
+  
+  TCC0->INTENSET.bit.MC0 = 1;                           // Enable TC5 Overflow Interrupt Request (OVF)
+  while(TCC0->STATUS.reg & TC_STATUS_SYNCBUSY); 
 }
 
 
