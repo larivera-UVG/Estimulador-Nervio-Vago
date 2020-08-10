@@ -1,6 +1,13 @@
 # En este folder están los archivos asociados al Programador
 
-## Pruebas de interfaz gráfica y envío de parámetros desde ésta | 7 de junio de 2020
-- ComAP_GUI.py: archivo de Python en el que se realizó la interfaz gráfica. Desde ésta se pueden enviar frecuencias a Arduino para que haga resonar el buzzer a los diferentes valores que se le envían. 
+## Carpeta - Codigo-Arduino
+En esta carpeta se almacenan todos los archivos de Arduino utilizados para pruebas de comunicación serial. Los archivos de Arduino deben ir en carpetas de su mismo nombre y por eso los archivos están en carpetas distintas dentro de ésta. 
 
-- BuzzerControl.ino: archivo de Arduino que lee los valores enviados desde la interfaz gráfica de Python y hace resonar un buzzer a esta frecuencia recibida. Al recibir un cero, se apaga el buzzer. 
+## Carpeta - Codigo-Python
+En esta carpeta se almacenan los archivos de Python utilizados para envío de datos de manera serial y la creación de una interfaz gráfica y amigable. 
+
+## Carpeta - Documentación
+En esta carpeta se encuentra la versión actualizada del trabajo escrito de la tesis (en formato pdf) y toda la documentación de componentes utilizados.
+
+## Carpeta - Esquemáticos
+En esta carpeta se encuentran los archivos de Proteus y Altium, utilizados para simulación y creación de PCBs. 
