@@ -34,7 +34,7 @@ const unsigned int ON_OFF_TIME[14] = {18749, 9374, 5624, 3374, 2062, 1874, 1499,
 // ........................................ PWM and Timer Values Selection .............................................
 
 
-volatile unsigned int period = PWM_freq[0][4];
+volatile unsigned int period = PWM_freq[0][3];
 volatile float pulse_width = period*0.5; //PWM_pw[2][4];       
 volatile int ON_Time = ON_OFF_TIME[13];
 volatile int OFF_Time = ON_OFF_TIME[13];
@@ -48,9 +48,6 @@ bool state = 0;
 // Select Gen Clock to setting the waveform generator clock or sample rate
 const unsigned char gClock = 4;
 
-// Set the divide factor for the Gen Clock, 48MHz/1 = 48MHz
-const unsigned char dFactor = 1; 
-
 const int UD = 1;
 const int INC = 2;
 const int CS = 3;
@@ -59,6 +56,11 @@ bool flag=0;
 byte mode=0;
 int amplitude=1;
 int pulsos=0;
+
+int amplitude_max = 7;
+int frecuencia = 15;
+int ramp_pulses = frecuencia*2;
+int pulse_group = ramp_pulses/(amplitude_max-1);
 
 // .....................................................................................................................
 
@@ -168,14 +170,34 @@ void TCC0_Handler()
 
   if(mode==1)
   {
-    amplitude++;     
-    if(amplitude>11) amplitude=11;    
+    pulsos++;
+    if(pulsos>=pulse_group) 
+    {
+      amplitude++;
+      pulsos=0;     
+    }
+    if(amplitude>=amplitude_max) amplitude=amplitude_max;    
     flag=1;  
   } 
+  else if(mode==2)
+  {
+    pulsos++;
+    if(pulsos==frecuencia) 
+    {
+      amplitude--;
+      pulsos=0;     
+    } 
+    flag=1; 
+  }
   else if(mode==3)
   {
-    amplitude--;     
-    if(amplitude<1) amplitude=1;    
+    pulsos++;
+    if(pulsos>=pulse_group) 
+    {
+      amplitude--;
+      pulsos=0;     
+    }        
+    if(amplitude<=1) amplitude=1;    
     flag=1;     
   }
   else
@@ -219,17 +241,17 @@ void setResistance(int percent){
     
   for (int i=0; i<100; i++){            // Increment/Decrement Counter
     digitalWrite(INC, LOW);             // Low State (this gives a negative edge)
-    delayMicroseconds(10);               
+    delayMicroseconds(5);               
     digitalWrite(INC, HIGH);            // High State 
-    delayMicroseconds(10);
+    delayMicroseconds(5);
   }
 
   digitalWrite(UD, HIGH);               // Select Increment Counter
   for (int i=0; i<percent; i++){        // Increment/Decrement Counter
     digitalWrite(INC, LOW);             // Low State (this gives a negative edge)
-    delayMicroseconds(10);
+    delayMicroseconds(5);
     digitalWrite(INC, HIGH);            // High State 
-    delayMicroseconds(10);
+    delayMicroseconds(5);
   }
 
   //digitalWrite(CS, HIGH);               // Save counter in non-volatile memory and enter in Stand-By Mode
@@ -246,14 +268,15 @@ void TC5_Handler (void) {
 
   if(mode == 1)
   {
-    flag=1;
+    pulsos=0;
     Timer_Disable();                                    // Stop Timer to change to Ramp Up Time
-    TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with Ramp Up Time    
+    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Up Time    
     PWM_Start(); 
     Timer_Start();                                      // Enable Timer again    
   }
   else if(mode == 2)
   {
+    pulsos=0;
     Timer_Disable();                                    // Stop Timer to change to ON time value       
     TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
     //PWM_Start();                                        // Enable PWM 
@@ -261,10 +284,9 @@ void TC5_Handler (void) {
   } 
   else if(mode == 3) 
   {    
-    amplitude--;
-    flag=1;
+    pulsos=0;
     Timer_Disable();                                    // Stop Timer to change to Ramp Down Time
-    TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with Ramp Down Time    
+    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Down Time    
     Timer_Start();                                      // Enable Timer again                   
   }
   else if(mode == 4)
@@ -273,7 +295,7 @@ void TC5_Handler (void) {
     Timer_Disable();                                    // Stop Timer to change to OFF Time Value
     TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
     Timer_Start();                                      // Enable Timer again    
-    //digitalWrite(0, LOW);     
+    digitalWrite(0, LOW);     
   }
        
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag  
