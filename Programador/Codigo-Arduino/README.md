@@ -4,8 +4,12 @@
 
 - BuzzerControl.ino: archivo que lee los valores enviados desde la interfaz gráfica de Python y hace resonar un buzzer a esta frecuencia recibida. Al recibir un cero, se apaga el buzzer. 
 
-## Pruebas de comunicación inalámbrica entre dos Arduinos | 10 de agosto de 2020 
+## Pruebas de comunicación inalámbrica entre dos Arduinos | 10 de agosto  2020 
 
 - SendTry.ino: recibe los datos desde una terminal serial y los envía al otro Arduino por medio de comunicación inalámrbica
 - ReadTry.ino: recibe los datos del otro Arduino y los interpreta para poder modificar los parámetros de un pin PWM. 
 
+## Pruebas de comunicación inalámbrica entre dos Arduinos enviando los parámetros desde Python | 17 de agosto 2020
+
+- PyComTry.ino: recibe los parámetros desde Python, los almacena y los envía a otro Arduino para definir la estimulación 
+- PythonReadTry.ino: recibe los parámetros del otro Arduino y se encarga de manejarlos para definir la señal de estimulación. 
