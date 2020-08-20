@@ -17,6 +17,7 @@ void setup() {
   Serial1.setTimeout(100); // Timeout de 100 ms
   Serial2.setTimeout(100); // Timeout de 100 ms
 
+  pinMode(9, OUTPUT); 
   pinMode(11, OUTPUT); // Se define el pin 11 como salida
 }
 
@@ -65,24 +66,30 @@ void loop() {
     /* MODIFICACION DEL ANCHO DE PULSO */
     if(p20 == 0){
       analogWrite(11, 64);
+      analogWrite(9, 64);
       Serial2.println("Ancho 25%");
     }
-    else if(p20 == 01){
-      analogWrite(11, 127);
-      Serial2.println("Ancho 50%");
-    }
-    else if(p20 == 10){
-      analogWrite(11, 192);
-      Serial2.println("Ancho 75%");
-    }
-    else if(p20 == 11){
-      analogWrite(11, 255);
-      Serial2.println("Ancho 100%");
-    }
-    else if(p20 == 100){
+    else if(p20 == 01){ //01
       analogWrite(11, 77);
+      analogWrite(9, 77);
       Serial2.println("Ancho 30%");
     }
+    else if(p20 == 10){ //10
+      analogWrite(11, 127);
+      analogWrite(9, 127);
+      Serial2.println("Ancho 50%");
+    }
+    else if(p20 == 11){ //11
+      analogWrite(11, 192);
+      analogWrite(9, 192);
+      Serial2.println("Ancho 75%");
+    }
+    else if(p20 == 100){ //100
+      analogWrite(11, 255);
+      analogWrite(9, 255);
+      Serial2.println("Ancho 100%");
+    }
+    
 
     /* MODIFICACION DEL TIEMPO DE ESTIMULACION */
     if(p21 == 0){
@@ -101,34 +108,42 @@ void loop() {
       Serial2.println("Tiempo 5");
     }
 
+    TCCR1B = TCCR1B & B11111000 | B00000011; 
+
     /* MODIFICACION DE LA FRECUENCIA */
     if(p30 == 0){
       TCCR2B = TCCR2B & B11111000 | B00000100; // Frecuencia de 490.20 Hz en Pin 3/11
-      Serial2.println("Frecuencia 1");
+      Serial2.println("Frecuencia: 490.20 Hz");
     }
     else if(p30 == 01){
       TCCR2B = TCCR2B & B11111000 | B00000111; // Frecuencia de 30.64 Hz en Pin 3/11
-      Serial2.println("Frecuencia 2");
+      Serial2.println("Frecuencia: 30.64 Hz");
     }
     else if(p30 == 10){
-      Serial2.println("Frecuencia 3");
+      TCCR2B = TCCR2B & B11111000 | B00000110; // Frecuencia de 122.50 Hz en Pin 3/11
+      Serial2.println("Frecuencia: 122.50 Hz");
     }
     else if(p30 == 11){
-      Serial2.println("Frecuencia 4");
+      TCCR2B = TCCR2B & B11111000 | B00000101; // Frecuencia de 245.10 Hz en Pin 3/11
+      Serial2.println("Frecuencia: 245.10 Hz");
     }
     else if(p30 == 100){
-      Serial2.println("Frecuencia 5");
+      TCCR2B = TCCR2B & B11111000 | B00000011; // Frecuencia de 980.39 Hz en Pin 3/11
+      Serial2.println("Frecuencia: 980.39 Hz");
     }
     else if(p30 == 101){
-      Serial2.println("Frecuencia 6");
+      TCCR2B = TCCR2B & B11111000 | B00000010; // Frecuencia de 3921.16 Hz en Pin 3/11
+      Serial2.println("Frecuencia: 3921.16 Hz");
     }
     else if(p30 == 110){
-      Serial2.println("Frecuencia 7");
+      TCCR2B = TCCR2B & B11111000 | B00000001; // Frecuencia de 31372.55 Hz en Pin 3/11
+      Serial2.println("Frecuencia: 31372.55 Hz");
     }
     else if(p30 == 111){
       Serial2.println("Frecuencia 8");
     }
-      
+
+    
    
   }
     
