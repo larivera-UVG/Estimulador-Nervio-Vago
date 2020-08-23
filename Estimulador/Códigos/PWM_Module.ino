@@ -34,16 +34,14 @@ const unsigned int ON_OFF_TIME[14] = {18749, 9374, 5624, 3374, 2062, 1874, 1499,
 // ........................................ PWM and Timer Values Selection .............................................
 
 
-volatile unsigned int period = PWM_freq[0][3];
-volatile float pulse_width = period*0.5; //PWM_pw[2][4];       
+volatile unsigned int period;// = PWM_freq[0][3];
+volatile float pulse_width;// = period*0.25; //PWM_pw[2][0];     
 volatile int ON_Time = ON_OFF_TIME[13];
 volatile int OFF_Time = ON_OFF_TIME[13];
 
 
 // ............................... Variables for PWM, Timer and Digital Potentiometer ..................................
 
-
-bool state = 0;
 
 // Select Gen Clock to setting the waveform generator clock or sample rate
 const unsigned char gClock = 4;
@@ -54,13 +52,16 @@ const int CS = 3;
 
 bool flag=0;
 byte mode=0;
+
 int amplitude=1;
 int pulsos=0;
 
-int amplitude_max = 7;
+int amplitude_max = 98;
+int amplitude_min = 1;
 int frecuencia = 15;
-int ramp_pulses = frecuencia*2;
-int pulse_group = ramp_pulses/(amplitude_max-1);
+
+float ramp_interval;
+int timer_interval;
 
 // .....................................................................................................................
 
@@ -70,22 +71,63 @@ void setup()
 
 //...................................... Set Input/Output Pins Mode Configuration ......................................
   
-  pinMode(0, OUTPUT);               // VNS Stimulation Signal Output
-  pinMode(UD, OUTPUT);              // U/'D
-  pinMode(INC, OUTPUT);             // 'INC
-  pinMode(CS, OUTPUT);              // 'CS
-  //analogWriteResolution(10);
+  pinMode(0, OUTPUT);                 // VNS Stimulation Signal Output
+  pinMode(UD, OUTPUT);                // U/'D
+  pinMode(INC, OUTPUT);               // 'INC
+  pinMode(CS, OUTPUT);                // 'CS
+
   digitalWrite(UD, HIGH);
   digitalWrite(INC, HIGH);
-  digitalWrite(CS, HIGH);  
- 
-  setResistance(0);
 
+// .....................................................................................................................
+
+switch (frecuencia) 
+{ 
+  case 1:
+    period = PWM_freq[0][7];    
+    break;
+  case 2:
+    period = PWM_freq[0][6];
+    break;       
+  case 5:
+    period = PWM_freq[0][5];
+    break;       
+  case 10:
+    period = PWM_freq[0][4];
+    break;
+  case 15:
+    period = PWM_freq[0][3];
+    break;
+  case 20:
+    period = PWM_freq[0][2];
+    break;
+  case 25:
+    period = PWM_freq[0][1];
+    break; 
+  case 30:
+    period = PWM_freq[0][0];
+    break;                                           
+  default:
+    period = PWM_freq[0][7];
+    break;
+}
+
+  pulse_width = period*0.25;
+  
 //...................................... Configurare PWM (Stimulation signal) ..........................................
 
   PWM_Config();
   Enable_PWM_Interrupts();  
   //PWM_Start();
+
+// .....................................................................................................................
+
+  ramp_interval = (amplitude_max-1)/2;            // (98-1)/2s = 48.5Hz => 20.62ms
+  timer_interval = (46875.0/ramp_interval)-1;    // (46,875.0/48.5)-1 = 965.49 => 965 
+
+  Timer2_Config();
+  Timer2_Interrupts();
+  Timer2_Start();
 
 //...................................... Configurar Timer (ON/OFF Time) ................................................
 
@@ -108,57 +150,10 @@ void loop()
 
   if(flag==1)
   {
-     
-    switch (amplitude) 
-    { 
-      case 0:
-        setResistance(0);      
-        break;
-      case 1:
-        setResistance(8);
-        break;       
-      case 2:
-        setResistance(15);
-        break;       
-      case 3:
-        setResistance(23);
-        break;
-      case 4:
-        setResistance(30);
-        break;
-      case 5:
-        setResistance(38);
-        break;
-      case 6:
-        setResistance(45);
-        break; 
-      case 7:
-        setResistance(53);
-        break; 
-      case 8:
-        setResistance(61);
-        break;          
-      case 9:
-        setResistance(68);
-        break;  
-      case 10:
-        setResistance(76);
-        break; 
-      case 11:
-        setResistance(83);
-        break;
-      case 12:
-        setResistance(91);
-        break;
-      case 13:
-        setResistance(98);
-        break;                                          
-      default:
-        setResistance(98);
-        break;
-    }
+    setResistance(amplitude);     
     flag=0;
   }
+  
 }
 
 
@@ -168,18 +163,7 @@ void loop()
 void TCC0_Handler()
 {
 
-  if(mode==1)
-  {
-    pulsos++;
-    if(pulsos>=pulse_group) 
-    {
-      amplitude++;
-      pulsos=0;     
-    }
-    if(amplitude>=amplitude_max) amplitude=amplitude_max;    
-    flag=1;  
-  } 
-  else if(mode==2)
+  if(mode==2)
   {
     pulsos++;
     if(pulsos==frecuencia) 
@@ -189,47 +173,35 @@ void TCC0_Handler()
     } 
     flag=1; 
   }
-  else if(mode==3)
-  {
-    pulsos++;
-    if(pulsos>=pulse_group) 
-    {
-      amplitude--;
-      pulsos=0;     
-    }        
-    if(amplitude<=1) amplitude=1;    
-    flag=1;     
-  }
-  else
-  {
-    //amplitude=10;
-    //flag=1;  
-  }
-  
+
   TCC0->INTFLAG.bit.MC0 = 1;                            // Clear interrupt flag
+  
 }
 
 
 // .....................................................................................................................
 
 
-//void enable_interrupts() 
-//{
-//  NVIC_SetPriority(TCC1_IRQn, 0);
-//  NVIC_EnableIRQ(TCC1_IRQn);   
-//}
-//
-//
-//void TCC1_Handler() {
-//  REG_TCC1_PER = 128;
-//  while (TCC1->SYNCBUSY.bit.PER);
-//
-//  REG_TCC1_CC1 = (208/255.0)*128;
-//  while (TCC1->SYNCBUSY.bit.CC1);
-//
-//  REG_TCC0_INTFLAG = TC_INTFLAG_OVF;
-//
-//}
+void TCC1_Handler()
+{
+
+  if(mode==1)
+  {
+    amplitude++; 
+  }
+  else if(mode==3)
+  {
+    amplitude--;
+  }
+
+  if(amplitude > amplitude_max) amplitude = amplitude_max;  
+  if(amplitude < amplitude_min) amplitude = amplitude_min;
+  
+  flag = 1;
+
+  TCC1->INTFLAG.bit.MC0 = 1;            // Clear interrupt flag
+  
+}
 
 
 // .....................................................................................................................
@@ -268,14 +240,20 @@ void TC5_Handler (void) {
 
   if(mode == 1)
   {
-    pulsos=0;
     Timer_Disable();                                    // Stop Timer to change to Ramp Up Time
     TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Up Time    
     PWM_Start(); 
     Timer_Start();                                      // Enable Timer again    
+
+    //Timer2_Reset();
+    Timer2_Start();
+    
   }
   else if(mode == 2)
   {
+
+    Timer2_Stop();
+    
     pulsos=0;
     Timer_Disable();                                    // Stop Timer to change to ON time value       
     TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
@@ -284,13 +262,19 @@ void TC5_Handler (void) {
   } 
   else if(mode == 3) 
   {    
-    pulsos=0;
     Timer_Disable();                                    // Stop Timer to change to Ramp Down Time
     TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Down Time    
-    Timer_Start();                                      // Enable Timer again                   
+    Timer_Start();                                      // Enable Timer again     
+
+    //Timer2_Reset();
+    Timer2_Start();
+                  
   }
   else if(mode == 4)
   {
+
+    Timer2_Stop();
+    
     PWM_Stop();                                         // Disable PWM     
     Timer_Disable();                                    // Stop Timer to change to OFF Time Value
     TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
@@ -299,6 +283,7 @@ void TC5_Handler (void) {
   }
        
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag  
+  
 }
 
 
@@ -448,11 +433,10 @@ bool tcIsSyncing()
 // .....................................................................................................................
 
 
-// Enables TC5 and waits for it to be ready
 void Timer_Start()
 {
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE; //set the CTRLA register
-  while (tcIsSyncing()); //wait until snyc'd
+  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    // set the CTRLA register
+  while (tcIsSyncing());                        // wait until snyc'd
 }
 
 
@@ -506,3 +490,69 @@ void DAC_Init(void)
 
 
 // .....................................................................................................................
+
+
+void Timer2_Config()
+{
+
+  TCC1->WAVE.reg = TCC_WAVE_WAVEGEN_MFRQ;                 // Select NPWM (Single-slope): count up to PER, match on CC[n]
+  TCC1->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV1024;         // Divide counter by 1 (This is N)
+  while (TCC1->SYNCBUSY.bit.WAVE);                        // Wait for synchronization
+
+  TCC1->CC[0].reg = timer_interval; //961;                // Set PWM signal to 50% of duty cicle 
+  while (TCC1->SYNCBUSY.bit.CC0);                         // Wait for synchronization
+
+}
+
+
+// .....................................................................................................................
+
+
+void Timer2_Interrupts()
+{
+  
+  NVIC_DisableIRQ(TCC1_IRQn);
+  NVIC_ClearPendingIRQ(TCC1_IRQn);
+  NVIC_SetPriority(TCC1_IRQn, 1);
+  NVIC_EnableIRQ(TCC1_IRQn);
+
+  TCC1->INTENSET.bit.MC0 = 1;                           // Enable TC5 Overflow Interrupt Request (OVF)
+  while(TCC1->STATUS.reg & TC_STATUS_SYNCBUSY); 
+  
+} 
+
+
+// .....................................................................................................................
+
+void Timer2_Start()
+{ 
+  TCC1->CTRLA.reg |= (TCC_CTRLA_ENABLE);              // Enable TCC1 (Start PWM)
+  while (TCC1->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization     
+}
+
+
+// .....................................................................................................................
+
+
+void Timer2_Stop()
+{
+  TCC1->CTRLA.reg &= (~TCC_CTRLA_ENABLE);             // Disable TCC1 (Stop PWM)
+  while (TCC1->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
+}
+
+
+// .....................................................................................................................
+
+
+void Timer2_Reset()
+{
+  TCC1->CTRLA.reg = TCC_CTRLA_SWRST;
+  while (TCC1->CTRLA.bit.SWRST);
+
+
+// .....................................................................................................................
+
+
+// .....................................................................................................................
+  
+}
