@@ -6,3 +6,8 @@
 ## Actualización 17 de agosto 2020
 ### Versión actualizada de tesis con los resultados: 
 - Comunicación exitosa entre Proteus y Python. Se logran enviar los parámetros de estimulación desde la terminal de Spyder (Python)
+
+## Actualización 24 de agosto 2020
+### Versión actualizada de tesis con los resultados: 
+- Comunicación exitosa entre Proteus y Python con GUI. Los parámetros de estimulación se envían desde una interfaz gráfica fácil de usar.
+- Comunicación inalámbrica física exitosa con módulos RF 433 MHz. Se envía el número 500 desde el transmisor y el Arduino con el receptor imprime el valor en el monitor serial. 
