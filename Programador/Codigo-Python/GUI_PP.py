@@ -11,11 +11,41 @@ Ingeniería Mecatrónica - UVG
 #*****************************************************************************
 from tkinter import * # Libreria para interfaz grafica 
 import serial # Libreria para comunicacion serial 
+import serial.tools.list_ports
+
+def get_ports():
+    ports = serial.tools.list_ports.comports()
+    return ports
+
+def findArduino(portsFound):
+    commPort = 'None'
+    numConnection = len(portsFound)
+    
+    for i in range(0, numConnection):
+        port = foundPorts[i]
+        strPort = str(port)
+        
+        if 'Arduino' in strPort:
+            splitPort = strPort.split(' ')
+            commPort = (splitPort[0])
+    
+    return commPort
+
+foundPorts = get_ports()
+connectPort = findArduino(foundPorts)
+
+if connectPort != 'None':
+    ser = serial.Serial(connectPort, 115200)
+    print('Connected to' + connectPort)
+else:
+    print('Error de conexion, revisar')
+
 
 #*****************************************************************************
 # CONEXION CON ARDUINO
 #*****************************************************************************
-ser = serial.Serial('COM2', 115200) # Comunicacion serial al puerto 3 (COM3)
+#ser = serial.Serial('COM2', 115200) # Comunicacion serial al puerto 3 (COM3)
+#ser = serial.Serial('COM3', 115200) # Comunicacion serial al puerto 3 (COM3)
 
 #*****************************************************************************
 # FUNCIONES DEFINIDAS
@@ -96,7 +126,9 @@ def clear_all(): # Funcion para el boton que cierra el puerto y la ventana de
     ser.close() # Se cierra el puerto serial
     root.destroy() # Se cierra la ventana de interfaz grafica
 
-
+#def on_closing(): 
+#    if messagebox.askokcancel("Quit", "Desea salir?"):
+#        clear_all()
 #*****************************************************************************
 # INTERFAZ GRAFICA
 #*****************************************************************************
@@ -164,5 +196,5 @@ label3.grid(column = 0, row = 3) # Fila 0, columna 0
 label4.grid(column = 0, row = 4) # Fila 0, columna 0
 label5.grid(column = 0, row = 5) # Fila 0, columna 0
 
-
+#root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop() # Se crea la interfaz con todo lo definido
