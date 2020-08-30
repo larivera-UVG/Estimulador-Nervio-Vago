@@ -7,3 +7,7 @@
 ## Pruebas de comunicación inalámbrica entre dos Arduinos enviando los parámetros desde Python | 17 de agosto 2020
 
 - ProteusCom.py: archivo que envía los parámetros de estimulación a un Arduino en Proteus. 
+
+## Pruebas de comunicación inalámbrica físicas entre dos Arduinos enviando los parámetros desde Python | 30 de agosto 2020
+- GUI_PP.py: archivo que envía los parámetros de estimulación a un Arduino de manera física por medio de una interfaz gráfica.
+- GUI_PP.exe: interfaz gráfica convertida en aplicación para poder ser utilizada en cualquier computadora sin necesidad de tener Python instalado. 
