@@ -9,54 +9,61 @@ Ingeniería Mecatrónica - UVG
 #*****************************************************************************
 # LIBRERIAS UTILIZADAS
 #*****************************************************************************
+
 from tkinter import * # Libreria para interfaz grafica 
 import serial # Libreria para comunicacion serial 
-import serial.tools.list_ports
+import serial.tools.list_ports # Modulo para poder ver los puertos seriales
 
-def get_ports():
-    ports = serial.tools.list_ports.comports()
+#*****************************************************************************
+# FUNCIONES PARA PUERTO SERIAL
+#*****************************************************************************
+
+def get_ports(): # Funcion para ver los puertos activos
+    ports = serial.tools.list_ports.comports() # Ports guarda la lista de puertos
+    # activos
     return ports
 
-def findArduino(portsFound):
-    commPort = 'None'
-    numConnection = len(portsFound)
+def findArduino(portsFound): # Funcion para buscar al Arduino en los puertos
+    commPort = 'None' # Condicion para errores
+    numConnection = len(portsFound) # Numero de puertos activos 
     
-    for i in range(0, numConnection):
-        port = foundPorts[i]
-        strPort = str(port)
+    for i in range(0, numConnection): #Buscar en todos los puertos activos
+        port = foundPorts[i] # Tomar el puerto que coincide con el contador
+        strPort = str(port) # Convertir su nombre a string
         
-        if 'Arduino' in strPort:
-            splitPort = strPort.split(' ')
-            commPort = (splitPort[0])
+        if 'Arduino' in strPort: # Se busca la palabra Arduino en el string
+            splitPort = strPort.split(' ') #Se separa el string en los espacios
+            commPort = (splitPort[0]) # Se guarda el puerto donde se encuentra 
+            # el Arduino
+            # Arduino aparece como COMX - Arduino Uno (COM3), lo que nos interesa
+            # es el COMX por eso tomamos el espacio 0 del string divido, lo que
+            # corresponde a COMX
     
-    return commPort
-
-foundPorts = get_ports()
-connectPort = findArduino(foundPorts)
-
-if connectPort != 'None':
-    ser = serial.Serial(connectPort, 115200)
-    print('Connected to' + connectPort)
-else:
-    print('Error de conexion, revisar')
-
+    return commPort # Se retornoa el puerto del Arduino
 
 #*****************************************************************************
 # CONEXION CON ARDUINO
 #*****************************************************************************
+foundPorts = get_ports() # Se obtienen los puertos disponibles
+connectPort = findArduino(foundPorts) # Se busca el puerto del Arduino
+
+if connectPort != 'None': # Si se encontro el puerto
+    ser = serial.Serial(connectPort, 115200) # Nos conectamos a este
+    print('Connected to' + connectPort)
+else:
+    print('Error de conexion, revisar')
+
 #ser = serial.Serial('COM2', 115200) # Comunicacion serial al puerto 3 (COM3)
 #ser = serial.Serial('COM3', 115200) # Comunicacion serial al puerto 3 (COM3)
 
 #*****************************************************************************
-# FUNCIONES DEFINIDAS
+# FUNCIONES DEFINIDAS PARA GUI
 #*****************************************************************************
-
-#def send_val():
+def send_par(): # Funcion para el boton que envia los parametros seleccionados
+    #en la interfaz a Arduino
     
-def send_par(): # Funcion para el boton que envia las frecuencias a Arduino
-    
-    op1 = cl1.get()
-    if(op1 == opmodopts[0]):
+    op1 = cl1.get() # Se obtiene el valor del primer dropdown
+    if(op1 == opmodopts[0]): # Se almacena en variable la opcion correspondiente
         modo = 1
     elif(op1 == opmodopts[1]):
         modo = 2
@@ -110,8 +117,6 @@ def send_par(): # Funcion para el boton que envia las frecuencias a Arduino
         sleep = 1
     elif(op5 == sleepopts[1]):
         sleep = 2
-    elif(op5 == sleepopts[2]):
-        sleep = 3
         
     
     ser.write(str(modo).encode()) # Se envia el valor a Arduino
@@ -126,18 +131,19 @@ def clear_all(): # Funcion para el boton que cierra el puerto y la ventana de
     ser.close() # Se cierra el puerto serial
     root.destroy() # Se cierra la ventana de interfaz grafica
 
-#def on_closing(): 
-#    if messagebox.askokcancel("Quit", "Desea salir?"):
+#def on_closing(): # Funcion para cerrar el puerto serial y la interfaz gráfica
+    # cuando se presiona la X, no necesaria para app 
+#    if messagebox.askokcancel("Quit", "Desea salir?"): 
 #        clear_all()
+    
+    
 #*****************************************************************************
 # INTERFAZ GRAFICA
 #*****************************************************************************
 root = Tk() # Se define la ventana de interfaz grafica
 root.title("Envío de Parámetros") # Se titula a la ventana del GUI
 
-# DEFINICION DE BOTONES Y ENTRY BOX
-
-
+# Listas utilizadas para los dropdown boxes
 anchopts = ["25%", "30%", "50%", "75%", "100%"]
 freqopts = ["490.20 Hz", "30.64 Hz", "122.50 Hz", "245.10 Hz", 
             "980.39 Hz", "3921.16 Hz", "31372.55 Hz", "Frecuencia 8"]
@@ -145,6 +151,8 @@ opmodopts = ["Modo 1", "Modo 2", "Modo 3"]
 timeopts = ["Tiempo 1", "Tiempo 2", "Tiempo 3", "Tiempo 4", "Tiempo 5"]
 sleepopts = ["Sleep 1", "Sleep 2"]
 
+
+# DEFINICION DE BOTONES Y ENTRY BOX
 cl1 = StringVar()
 cl1.set(opmodopts[0])
 
@@ -175,12 +183,13 @@ drop4.grid(row=4, column=1,columnspan=2)
 drop5 = OptionMenu(root,cl5,*sleepopts)
 drop5.grid(row=5, column=1,columnspan=2)
 
-# Boton para enviar frecuencias a Arduino
+# Boton para enviar parametros a Arduino
 button_snd = Button(root, text="SEND",padx=40, pady=20, command=send_par)
 
 # Boton para cerrar todo
 button_close = Button(root, text="QUIT",padx=40, pady=20, command=clear_all)
-# Texto que dice "Frecuencia
+
+
 label1 = Label(root, text = "Modo de Operación: ")
 label2 = Label(root, text = "Ancho de pulso: ")
 label3 = Label(root, text = "Tiempo: ")
