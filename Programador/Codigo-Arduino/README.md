@@ -13,3 +13,8 @@
 
 - PyComTry.ino: recibe los parámetros desde Python, los almacena y los envía a otro Arduino para definir la estimulación 
 - PythonReadTry.ino: recibe los parámetros del otro Arduino y se encarga de manejarlos para definir la señal de estimulación. 
+
+## Pruebas de comunicación inalámbrica físicas entre dos Arduinos, utilizando la interfaz gráfica creada en Python | 30 de agosto 2020
+- RFSendTry.ino: recibe los parámetros de la interfaz gráfica en Python y los envía por medio de un módulo RF (433 MHz) a otro Arduino.
+- RFReceiveTry.ino: recibe los parámetros del otro Arduino con el receptor RF y los interpreta para cambiar los parámetros de una señal PWM. 
+- Se eliminaron los archivos BuzzerControl.ino, SendTry.ino y ReadTry.ino pues ya no son utilizados.
