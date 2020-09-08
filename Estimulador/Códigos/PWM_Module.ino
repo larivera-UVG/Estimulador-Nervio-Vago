@@ -17,7 +17,7 @@
 
 // Frequency configuration of the Stimulation Signal (PWM) for 30, 25, 20, 15, 10, 5, 2 and 1Hz  
 const unsigned int PWM_freq[3][8] = {{1562, 1874, 2343, 3124, 4687, 9374, 23437, 46874},    // 48MHz
-                                     {2082, 2499, 3124, 4166, 6249, 12499, 31249, 62499},   // 8MHz
+                                     {1041, 1249, 1562, 2082, 3124, 6249, 15624, 31249},    // 8MHz
                                      {1066, 1279, 1599, 2132, 3199, 6399, 15999, 31999}};   // 32KHz
 
 // CCx values for 1ms, 750us, 500us, 250us and 130us respectively, for pulse 
@@ -34,10 +34,10 @@ const unsigned int ON_OFF_TIME[14] = {18749, 9374, 5624, 3374, 2062, 1874, 1499,
 // ........................................ PWM and Timer Values Selection .............................................
 
 
-volatile unsigned int period;// = PWM_freq[0][3];
-volatile float pulse_width;// = period*0.25; //PWM_pw[2][0];     
-volatile int ON_Time = ON_OFF_TIME[13];
-volatile int OFF_Time = ON_OFF_TIME[13];
+volatile unsigned int period;         // = PWM_freq[0][3];
+volatile float pulse_width;           // = period*0.25; //PWM_pw[2][0];     
+volatile int ON_Time;                 // = ON_OFF_TIME[13];
+volatile int OFF_Time;                // = ON_OFF_TIME[13];
 
 
 // ............................... Variables for PWM, Timer and Digital Potentiometer ..................................
@@ -52,13 +52,16 @@ const int CS = 3;
 
 bool flag=0;
 byte mode=0;
+bool Ramp_mode = false; 
 
-int amplitude=1;
 int pulsos=0;
-
+int amplitude = 1;
 int amplitude_max = 98;
 int amplitude_min = 1;
-int frecuencia = 15;
+
+int frecuencia = 1;
+int Stimulation_time = 1;
+int Repose_time = 1;
 
 float ramp_interval;
 int timer_interval;
@@ -68,6 +71,8 @@ int timer_interval;
 
 void setup()
 {
+
+//PM->CPUSEL.reg = PM_CPUSEL_CPUDIV(4);
 
 //...................................... Set Input/Output Pins Mode Configuration ......................................
   
@@ -84,35 +89,145 @@ void setup()
 switch (frecuencia) 
 { 
   case 1:
-    period = PWM_freq[0][7];    
+    period = PWM_freq[1][7];    
     break;
   case 2:
-    period = PWM_freq[0][6];
+    period = PWM_freq[1][6];
     break;       
   case 5:
-    period = PWM_freq[0][5];
+    period = PWM_freq[1][5];
     break;       
   case 10:
-    period = PWM_freq[0][4];
+    period = PWM_freq[1][4];
     break;
   case 15:
-    period = PWM_freq[0][3];
+    period = PWM_freq[1][3];
     break;
   case 20:
-    period = PWM_freq[0][2];
+    period = PWM_freq[1][2];
     break;
   case 25:
-    period = PWM_freq[0][1];
+    period = PWM_freq[1][1];
     break; 
   case 30:
-    period = PWM_freq[0][0];
+    period = PWM_freq[1][0];
     break;                                           
   default:
-    period = PWM_freq[0][7];
+    period = PWM_freq[1][7];
     break;
 }
 
   pulse_width = period*0.25;
+
+
+switch (Stimulation_time) 
+{ 
+  case 1:
+    ON_Time = ON_OFF_TIME[13];    
+    break;
+  case 2:
+    ON_Time = ON_OFF_TIME[12]; 
+    break;       
+  case 7:
+    ON_Time = ON_OFF_TIME[11]; 
+    break;       
+  case 14:
+    ON_Time = ON_OFF_TIME[10]; 
+    break;
+  case 18:
+    ON_Time = ON_OFF_TIME[9]; 
+    break;
+  case 21:
+    ON_Time = ON_OFF_TIME[8]; 
+    break;
+  case 30:
+    ON_Time = ON_OFF_TIME[7]; 
+    break; 
+  case 48:
+    ON_Time = ON_OFF_TIME[6]; 
+    break;    
+  case 60:
+    ON_Time = ON_OFF_TIME[5]; 
+    break;                 
+  case 66:
+    ON_Time = ON_OFF_TIME[4]; 
+    break; 
+  case 108:
+    ON_Time = ON_OFF_TIME[3]; 
+    break;     
+  case 180:
+    ON_Time = ON_OFF_TIME[2]; 
+    break;
+  case 300:
+    ON_Time = ON_OFF_TIME[1]; 
+    break;          
+  case 600:
+    ON_Time = ON_OFF_TIME[0]; 
+    break;     
+  default:
+    ON_Time = ON_OFF_TIME[7];
+    break;
+}
+
+
+switch (Repose_time) 
+{ 
+  case 1:
+    OFF_Time = ON_OFF_TIME[13];    
+    break;
+  case 2:
+    OFF_Time = ON_OFF_TIME[12]; 
+    break;       
+  case 7:
+    OFF_Time = ON_OFF_TIME[11]; 
+    break;       
+  case 14:
+    OFF_Time = ON_OFF_TIME[10]; 
+    break;
+  case 18:
+    OFF_Time = ON_OFF_TIME[9]; 
+    break;
+  case 21:
+    OFF_Time = ON_OFF_TIME[8]; 
+    break;
+  case 30:
+    OFF_Time = ON_OFF_TIME[7]; 
+    break; 
+  case 48:
+    OFF_Time = ON_OFF_TIME[6]; 
+    break;    
+  case 60:
+    OFF_Time = ON_OFF_TIME[5]; 
+    break;                 
+  case 66:
+    OFF_Time = ON_OFF_TIME[4]; 
+    break; 
+  case 108:
+    OFF_Time = ON_OFF_TIME[3]; 
+    break;     
+  case 180:
+    OFF_Time = ON_OFF_TIME[2]; 
+    break;
+  case 300:
+    OFF_Time = ON_OFF_TIME[1]; 
+    break;          
+  case 600:
+    OFF_Time = ON_OFF_TIME[0]; 
+    break;     
+  default:
+    OFF_Time = ON_OFF_TIME[0];
+    break;
+}
+
+  if (frecuencia >= 10)
+  {
+    Ramp_mode = true;  
+  }
+  else
+  {
+    Ramp_mode = false;  
+  }
+
   
 //...................................... Configurare PWM (Stimulation signal) ..........................................
 
@@ -120,14 +235,25 @@ switch (frecuencia)
   Enable_PWM_Interrupts();  
   //PWM_Start();
 
-// .....................................................................................................................
+// ..................................... Configurar parametros de la rampa .............................................
 
+if (Ramp_mode == true)
+{
+
+  amplitude = 1;                                  // Ramp-up Starts in Amplitude = 1
+  
   ramp_interval = (amplitude_max-1)/2;            // (98-1)/2s = 48.5Hz => 20.62ms
-  timer_interval = (46875.0/ramp_interval)-1;    // (46,875.0/48.5)-1 = 965.49 => 965 
+  timer_interval = (7812.5/ramp_interval)-1; // (46875.0/ramp_interval)-1;     // (46,875.0/48.5)-1 = 965.49 => 965 
 
-  Timer2_Config();
-  Timer2_Interrupts();
-  Timer2_Start();
+  Timer2_Config();                                // Configurate Timer for Ramp Amplitude Refresh
+  Timer2_Interrupts();                            // Enable Ramp Amplitude Refresh
+  Timer2_Start();                                 // Start Timer for Ramp Amplitude Refresh
+}
+else
+{
+  amplitude = amplitude_max;
+  //PWM_Start();
+}
 
 //...................................... Configurar Timer (ON/OFF Time) ................................................
 
@@ -168,10 +294,11 @@ void TCC0_Handler()
     pulsos++;
     if(pulsos==frecuencia) 
     {
-      amplitude--;
-      pulsos=0;     
+      pulsos=0;
+      if(Ramp_mode == true) amplitude--;
+      flag=1;     
     } 
-    flag=1; 
+     
   }
 
   TCC0->INTFLAG.bit.MC0 = 1;                            // Clear interrupt flag
@@ -185,21 +312,14 @@ void TCC0_Handler()
 void TCC1_Handler()
 {
 
-  if(mode==1)
-  {
-    amplitude++; 
-  }
-  else if(mode==3)
-  {
-    amplitude--;
-  }
+  if(mode==1) amplitude++;              // Increment Amplitude for Ramp-up 
+  else if(mode==3) amplitude--;         // Decrement Amplitude for Ramp-down
 
   if(amplitude > amplitude_max) amplitude = amplitude_max;  
   if(amplitude < amplitude_min) amplitude = amplitude_min;
-  
   flag = 1;
 
-  TCC1->INTFLAG.bit.MC0 = 1;            // Clear interrupt flag
+  TCC1->INTFLAG.bit.MC0 = 1;            
   
 }
 
@@ -235,18 +355,28 @@ void setResistance(int percent){
 
 void TC5_Handler (void) {
 
-  mode++;                                               // Ramp Up -> ON Time -> Ramp Down -> OFF Time
-  if(mode>=5) mode=1;                                   // Reset Stimultation Sequence
+  if(Ramp_mode == true)
+  {
+    mode++;                                             // Ramp Up -> ON Time -> Ramp Down -> OFF Time
+    if(mode>=5) mode=1;                                 // Reset Stimultation Sequence    
+  }
+  else
+  {
+    if(mode==2) mode = 4;                               // ON Time -> OFF Time
+    else if(mode==4) mode = 2;
+    else mode = 2;                                      // Reset Stimultation Sequence 
+  } 
 
+  
   if(mode == 1)
   {
-    Timer_Disable();                                    // Stop Timer to change to Ramp Up Time
-    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Up Time    
-    PWM_Start(); 
+    
+    Timer_Disable();                                    // Stop Timer to change to Ramp Up Time (2S)
+    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Up Time (2S)   
+    PWM_Start();                                        // Start PWM
     Timer_Start();                                      // Enable Timer again    
 
-    //Timer2_Reset();
-    Timer2_Start();
+    Timer2_Start();                                     // Update Ramp Amplitude
     
   }
   else if(mode == 2)
@@ -256,18 +386,19 @@ void TC5_Handler (void) {
     
     pulsos=0;
     Timer_Disable();                                    // Stop Timer to change to ON time value       
-    TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)
-    //PWM_Start();                                        // Enable PWM 
-    Timer_Start();                                      // Enable Timer again     
+    TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)    
+    if(Ramp_mode == false) PWM_Start();                 // Enable PWM 
+    Timer_Start();                                      // Enable Timer again    
+     
   } 
   else if(mode == 3) 
-  {    
+  { 
+       
     Timer_Disable();                                    // Stop Timer to change to Ramp Down Time
     TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Down Time    
     Timer_Start();                                      // Enable Timer again     
 
-    //Timer2_Reset();
-    Timer2_Start();
+    Timer2_Start();                                     // Update Ramp Amplitude
                   
   }
   else if(mode == 4)
@@ -280,6 +411,7 @@ void TC5_Handler (void) {
     TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
     Timer_Start();                                      // Enable Timer again    
     digitalWrite(0, LOW);     
+    
   }
        
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag  
@@ -296,7 +428,7 @@ void PWM_Config()
   // Enable and configure the Generic CLK Generator (GCLK)
   REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |                   // Improve duty cycle 
                      GCLK_GENCTRL_GENEN |                 // Enable GCLK
-                     GCLK_GENCTRL_SRC_DFLL48M |           // OSC32K | OSC8M | DFLL48M |   // Set the 48MHz as Clock Source
+                     GCLK_GENCTRL_SRC_OSC8M |   //DFLL48M |           // OSC32K | OSC8M | DFLL48M |   // Set the 48MHz as Clock Source
                      GCLK_GENCTRL_ID(gClock);             // Select GCLK4 as ID 
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
@@ -311,7 +443,7 @@ void PWM_Config()
                      GCLK_CLKCTRL_ID_TCC0_TCC1;           // Feed CLK4 to TCC0 and TCC1
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
-  TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV1024;         // Divide counter by 1 (This is N)
+  TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV256;    //DIV1024;         // Divide counter by 1 (This is N)
   TCC0->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;               // Set Timer counter Mode to 16 bits
   TCC0->WAVE.reg = TCC_WAVE_WAVEGEN_NPWM;                 // Select NPWM (Single-slope): count up to PER, match on CC[n]
   while (TCC0->SYNCBUSY.bit.WAVE);                        // Wait for synchronization
@@ -548,6 +680,7 @@ void Timer2_Reset()
 {
   TCC1->CTRLA.reg = TCC_CTRLA_SWRST;
   while (TCC1->CTRLA.bit.SWRST);
+}
 
 
 // .....................................................................................................................
@@ -555,4 +688,3 @@ void Timer2_Reset()
 
 // .....................................................................................................................
   
-}
