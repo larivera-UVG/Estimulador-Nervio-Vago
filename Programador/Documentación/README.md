@@ -18,4 +18,7 @@
 - Creación de una aplicación para poder utilizar la interfaz gráfica de forma universal, sin necesidad de instalar Python.
 - Búsqueda automática del puerto USB (serial) en el que está conectado el Arduino transmisor. 
 
-
+## Actualización 18 de septiembre 2020
+### Versión actualizada de tesis
+- Comunicación exitosa entre NodeMcu y Arduino utilizando los módulos RF de 433 MHz. Los valores se envían de forma repetida. Se debe cambiar el código para resolver este problema.
+- Todas las secciones terminadas. 
