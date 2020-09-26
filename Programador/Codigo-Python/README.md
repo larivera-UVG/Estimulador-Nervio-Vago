@@ -11,3 +11,6 @@
 ## Pruebas de comunicación inalámbrica físicas entre dos Arduinos enviando los parámetros desde Python | 30 de agosto 2020
 - GUI_PP.py: archivo que envía los parámetros de estimulación a un Arduino de manera física por medio de una interfaz gráfica.
 - GUI_PP.exe: interfaz gráfica convertida en aplicación para poder ser utilizada en cualquier computadora sin necesidad de tener Python instalado. 
+
+## Pruebas de comunicación entre PC (GUI en Python) y controlador de la varilla (NodeMcu) por medio de WiFi | 26 de septiembre de 2020
+- NMWiFi.py: archivo con genera la interfaz gráfica con capacidad de enviar los parámetros al controlador por medio de WiFi
