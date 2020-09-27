@@ -23,7 +23,7 @@ const unsigned int PWM_freq[3][8] = {{1562, 1874, 2343, 3124, 4687, 9374, 23437,
 // CCx values for 1ms, 750us, 500us, 250us and 130us respectively, for pulse 
 // width or hight state in the square signal (PWM) during the Stimulation Time
 const unsigned char PWM_pw[3][5] = {{47, 35, 23, 12, 6},   // 48MHz
-                                    {62, 47, 31, 16, 8},   // 8MHz
+                                    {31, 23, 16, 8, 4},    // 8MHz
                                     {32, 24, 16, 8, 4}};   // 32KHz
 
 // Array for CCx values for 600, 300, 180, 108, 66, 60 48, 30, 21, 18, 14, 7, 2, 1s respectively, for
@@ -45,23 +45,25 @@ volatile int OFF_Time;                // = ON_OFF_TIME[13];
 
 // Select Gen Clock to setting the waveform generator clock or sample rate
 const unsigned char gClock = 4;
+byte PWM_CLK; 
 
-const int UD = 1;
-const int INC = 2;
-const int CS = 3;
+const byte UD = 1;
+const byte INC = 2;
+const byte CS = 3;
 
-bool flag=0;
-byte mode=0;
+bool flag = 0;
+byte mode = 0;
 bool Ramp_mode = false; 
+bool go_to_sleep = false;
 
-int pulsos=0;
-int amplitude = 1;
+int pulsos = 0;
 int amplitude_max = 98;
 int amplitude_min = 1;
 
-int frecuencia = 1;
-int Stimulation_time = 1;
-int Repose_time = 1;
+int amplitude;
+int frecuencia = 5;
+int Stimulation_time = 7;
+int Repose_time = 48;
 
 float ramp_interval;
 int timer_interval;
@@ -86,138 +88,138 @@ void setup()
 
 // .....................................................................................................................
 
-switch (frecuencia) 
-{ 
-  case 1:
-    period = PWM_freq[1][7];    
-    break;
-  case 2:
-    period = PWM_freq[1][6];
-    break;       
-  case 5:
-    period = PWM_freq[1][5];
-    break;       
-  case 10:
-    period = PWM_freq[1][4];
-    break;
-  case 15:
-    period = PWM_freq[1][3];
-    break;
-  case 20:
-    period = PWM_freq[1][2];
-    break;
-  case 25:
-    period = PWM_freq[1][1];
-    break; 
-  case 30:
-    period = PWM_freq[1][0];
-    break;                                           
-  default:
-    period = PWM_freq[1][7];
-    break;
-}
+  switch (frecuencia) 
+  { 
+    case 1:
+      period = PWM_freq[1][7];    
+      break;
+    case 2:
+      period = PWM_freq[1][6];
+      break;       
+    case 5:
+      period = PWM_freq[1][5];
+      break;       
+    case 10:
+      period = PWM_freq[1][4];
+      break;
+    case 15:
+      period = PWM_freq[1][3];
+      break;
+    case 20:
+      period = PWM_freq[1][2];
+      break;
+    case 25:
+      period = PWM_freq[1][1];
+      break; 
+    case 30:
+      period = PWM_freq[1][0];
+      break;                                           
+    default:
+      period = PWM_freq[1][7];
+      break;
+  }
 
-  pulse_width = period*0.25;
+  pulse_width = PWM_pw[1][0];
+  //pulse_width = period*0.5;
+
+  switch (Stimulation_time) 
+  { 
+    case 1:
+      ON_Time = ON_OFF_TIME[13];    
+      break;
+    case 2:
+      ON_Time = ON_OFF_TIME[12]; 
+      break;       
+    case 7:
+      ON_Time = ON_OFF_TIME[11]; 
+      break;       
+    case 14:
+      ON_Time = ON_OFF_TIME[10]; 
+      break;
+    case 18:
+      ON_Time = ON_OFF_TIME[9]; 
+      break;
+    case 21:
+      ON_Time = ON_OFF_TIME[8]; 
+      break;
+    case 30:
+      ON_Time = ON_OFF_TIME[7]; 
+      break; 
+    case 48:
+      ON_Time = ON_OFF_TIME[6]; 
+      break;    
+    case 60:
+      ON_Time = ON_OFF_TIME[5]; 
+      break;                 
+    case 66:
+      ON_Time = ON_OFF_TIME[4]; 
+      break; 
+    case 108:
+      ON_Time = ON_OFF_TIME[3]; 
+      break;     
+    case 180:
+      ON_Time = ON_OFF_TIME[2]; 
+      break;
+    case 300:
+      ON_Time = ON_OFF_TIME[1]; 
+      break;          
+    case 600:
+      ON_Time = ON_OFF_TIME[0]; 
+      break;     
+    default:
+      ON_Time = ON_OFF_TIME[7];
+      break;
+  }
 
 
-switch (Stimulation_time) 
-{ 
-  case 1:
-    ON_Time = ON_OFF_TIME[13];    
-    break;
-  case 2:
-    ON_Time = ON_OFF_TIME[12]; 
-    break;       
-  case 7:
-    ON_Time = ON_OFF_TIME[11]; 
-    break;       
-  case 14:
-    ON_Time = ON_OFF_TIME[10]; 
-    break;
-  case 18:
-    ON_Time = ON_OFF_TIME[9]; 
-    break;
-  case 21:
-    ON_Time = ON_OFF_TIME[8]; 
-    break;
-  case 30:
-    ON_Time = ON_OFF_TIME[7]; 
-    break; 
-  case 48:
-    ON_Time = ON_OFF_TIME[6]; 
-    break;    
-  case 60:
-    ON_Time = ON_OFF_TIME[5]; 
-    break;                 
-  case 66:
-    ON_Time = ON_OFF_TIME[4]; 
-    break; 
-  case 108:
-    ON_Time = ON_OFF_TIME[3]; 
-    break;     
-  case 180:
-    ON_Time = ON_OFF_TIME[2]; 
-    break;
-  case 300:
-    ON_Time = ON_OFF_TIME[1]; 
-    break;          
-  case 600:
-    ON_Time = ON_OFF_TIME[0]; 
-    break;     
-  default:
-    ON_Time = ON_OFF_TIME[7];
-    break;
-}
-
-
-switch (Repose_time) 
-{ 
-  case 1:
-    OFF_Time = ON_OFF_TIME[13];    
-    break;
-  case 2:
-    OFF_Time = ON_OFF_TIME[12]; 
-    break;       
-  case 7:
-    OFF_Time = ON_OFF_TIME[11]; 
-    break;       
-  case 14:
-    OFF_Time = ON_OFF_TIME[10]; 
-    break;
-  case 18:
-    OFF_Time = ON_OFF_TIME[9]; 
-    break;
-  case 21:
-    OFF_Time = ON_OFF_TIME[8]; 
-    break;
-  case 30:
-    OFF_Time = ON_OFF_TIME[7]; 
-    break; 
-  case 48:
-    OFF_Time = ON_OFF_TIME[6]; 
-    break;    
-  case 60:
-    OFF_Time = ON_OFF_TIME[5]; 
-    break;                 
-  case 66:
-    OFF_Time = ON_OFF_TIME[4]; 
-    break; 
-  case 108:
-    OFF_Time = ON_OFF_TIME[3]; 
-    break;     
-  case 180:
-    OFF_Time = ON_OFF_TIME[2]; 
-    break;
-  case 300:
-    OFF_Time = ON_OFF_TIME[1]; 
-    break;          
-  case 600:
-    OFF_Time = ON_OFF_TIME[0]; 
-    break;     
-  default:
-    OFF_Time = ON_OFF_TIME[0];
-    break;
-}
+  switch (Repose_time) 
+  { 
+    case 1:
+      OFF_Time = ON_OFF_TIME[13];    
+      break;
+    case 2:
+      OFF_Time = ON_OFF_TIME[12]; 
+      break;       
+    case 7:
+      OFF_Time = ON_OFF_TIME[11]; 
+      break;       
+    case 14:
+      OFF_Time = ON_OFF_TIME[10]; 
+      break;
+    case 18:
+      OFF_Time = ON_OFF_TIME[9]; 
+      break;
+    case 21:
+      OFF_Time = ON_OFF_TIME[8]; 
+      break;
+    case 30:
+      OFF_Time = ON_OFF_TIME[7]; 
+      break; 
+    case 48:
+      OFF_Time = ON_OFF_TIME[6]; 
+      break;    
+    case 60:
+      OFF_Time = ON_OFF_TIME[5]; 
+      break;                 
+    case 66:
+      OFF_Time = ON_OFF_TIME[4]; 
+      break; 
+    case 108:
+      OFF_Time = ON_OFF_TIME[3]; 
+      break;     
+    case 180:
+      OFF_Time = ON_OFF_TIME[2]; 
+      break;
+    case 300:
+      OFF_Time = ON_OFF_TIME[1]; 
+      break;          
+    case 600:
+      OFF_Time = ON_OFF_TIME[0]; 
+      break;     
+    default:
+      OFF_Time = ON_OFF_TIME[0];
+      break;
+  }
 
   if (frecuencia >= 10)
   {
@@ -240,10 +242,10 @@ switch (Repose_time)
 if (Ramp_mode == true)
 {
 
-  amplitude = 1;                                  // Ramp-up Starts in Amplitude = 1
+  amplitude = amplitude_min;                                  // Ramp-up Starts in Amplitude = 1
   
   ramp_interval = (amplitude_max-1)/2;            // (98-1)/2s = 48.5Hz => 20.62ms
-  timer_interval = (7812.5/ramp_interval)-1; // (46875.0/ramp_interval)-1;     // (46,875.0/48.5)-1 = 965.49 => 965 
+  timer_interval = (7812.5/ramp_interval)-1;      // (46875.0/ramp_interval)-1;     // (46,875.0/48.5)-1 = 965.49 => 965 
 
   Timer2_Config();                                // Configurate Timer for Ramp Amplitude Refresh
   Timer2_Interrupts();                            // Enable Ramp Amplitude Refresh
@@ -278,6 +280,12 @@ void loop()
   {
     setResistance(amplitude);     
     flag=0;
+  }
+
+  if(go_to_sleep)
+  {
+    go_to_sleep = false;
+    SAMD21_Sleep();    
   }
   
 }
@@ -411,6 +419,8 @@ void TC5_Handler (void) {
     TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
     Timer_Start();                                      // Enable Timer again    
     digitalWrite(0, LOW);     
+
+    go_to_sleep = true;
     
   }
        
@@ -425,23 +435,30 @@ void TC5_Handler (void) {
 void PWM_Config()
 {
 
+  PM->APBCMASK.reg |= PM_APBCMASK_TCC0;
+  //GCLK_GENCTRL_RUNSTDBY |             // Set GCLK4 to run in standby mode 
+
+
   // Enable and configure the Generic CLK Generator (GCLK)
-  REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |                   // Improve duty cycle 
-                     GCLK_GENCTRL_GENEN |                 // Enable GCLK
-                     GCLK_GENCTRL_SRC_OSC8M |   //DFLL48M |           // OSC32K | OSC8M | DFLL48M |   // Set the 48MHz as Clock Source
-                     GCLK_GENCTRL_ID(gClock);             // Select GCLK4 as ID 
+  GCLK->GENCTRL.reg = GCLK_GENCTRL_IDC |                  // Improve duty cycle 
+                      GCLK_GENCTRL_GENEN |                // Enable GCLK
+                      GCLK_GENCTRL_SRC_OSC8M |            //DFLL48M |           // OSC32K | OSC8M | DFLL48M |   // Set the 48MHz as Clock Source
+                      GCLK_GENCTRL_ID(gClock);            // Select GCLK4 as ID 
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
+
   // Select clock divider to GCLK4
-  REG_GCLK_GENDIV = GCLK_GENDIV_DIV(1) |                  // Divide 48MHz by 1 
-                    GCLK_GENDIV_ID(gClock);               // Apply it to GCLK4    
+  GCLK->GENDIV.reg = GCLK_GENDIV_DIV(1) |                 // Divide 48MHz by 1 
+                     GCLK_GENDIV_ID(gClock);              // Apply it to GCLK4    
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
+
   
   // Enable GCLK4 and connect it to TCC0 and TCC1
-  REG_GCLK_CLKCTRL = GCLK_CLKCTRL_CLKEN |                 // Enable Generic Clock 
-                     GCLK_CLKCTRL_GEN_GCLK4 |             // Select GCLK4
-                     GCLK_CLKCTRL_ID_TCC0_TCC1;           // Feed CLK4 to TCC0 and TCC1
+  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN |                // Enable Generic Clock 
+                      GCLK_CLKCTRL_GEN_GCLK4 |            // Select GCLK4
+                      GCLK_CLKCTRL_ID_TCC0_TCC1;          // Feed CLK4 to TCC0 and TCC1
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
+
 
   TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV256;    //DIV1024;         // Divide counter by 1 (This is N)
   TCC0->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;               // Set Timer counter Mode to 16 bits
@@ -514,30 +531,36 @@ void Timer_Config()
 {
 
   // Enable and configure the Generic CLK Generator (GCLK)
-  REG_GCLK_GENCTRL = GCLK_GENCTRL_IDC |                 // Improve duty cycle 
-                     GCLK_GENCTRL_GENEN |               // Enable GCLK
-                     GCLK_GENCTRL_SRC_OSC32K |          // Set the 32KHz as Clock Source
-                     GCLK_GENCTRL_ID(5);                // Select GCLK5 as ID 
+  GCLK->GENCTRL.reg = GCLK_GENCTRL_RUNSTDBY |           // Set GCLK5 to run in standby mode
+                      GCLK_GENCTRL_IDC |                // Improve duty cycle 
+                      GCLK_GENCTRL_GENEN |              // Enable GCLK
+                      GCLK_GENCTRL_SRC_OSC32K |         // Set the 32KHz as Clock Source
+                      GCLK_GENCTRL_ID(5);               // Select GCLK5 as ID 
   while (GCLK->STATUS.bit.SYNCBUSY);                    // Wait for synchronization
+
 
   // Select clock divider to GCLK5
-  REG_GCLK_GENDIV = GCLK_GENDIV_DIV(1) |                // Divide 32KHz by 1
-                    GCLK_GENDIV_ID(5);                  // Apply it to GCLK5 
+  GCLK->GENDIV.reg = GCLK_GENDIV_DIV(1) |               // Divide 32KHz by 1
+                     GCLK_GENDIV_ID(5);                 // Apply it to GCLK5 
   while (GCLK->STATUS.bit.SYNCBUSY);                    // Wait for synchronization
 
+
   // Enable GCLK0 and connect it to TC4 and TC5
-  REG_GCLK_CLKCTRL = GCLK_CLKCTRL_CLKEN |               // Enable Generic Clock 
-                     GCLK_CLKCTRL_GEN_GCLK5 |           // Select GCLK5
-                     GCLK_CLKCTRL_ID_TC4_TC5;           // Feed CLK5 to TC4 and TC5
+  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN |              // Enable Generic Clock 
+                      GCLK_CLKCTRL_GEN_GCLK5 |          // Select GCLK5
+                      GCLK_CLKCTRL_ID_TC4_TC5;          // Feed CLK5 to TC4 and TC5
   while (GCLK->STATUS.bit.SYNCBUSY);                    // Wait for synchronization
+
  
   Timer_Reset(); //reset TC5
 
   // Set TC5 Mode, WaveForm, Prescaler and Enable it 
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_MODE_COUNT16;      // Set Timer counter mode to 16 bits
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;      // Set TC5 mode as match frequency
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1024; // Set prescaler to 1024
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;            // Enable TC5
+  TC5->COUNT16.CTRLA.reg = TC_CTRLA_RUNSTDBY |           // Set the timer to run in standby mode
+                           TC_CTRLA_MODE_COUNT16 |       // Set Timer counter mode to 16 bits
+                           TC_CTRLA_WAVEGEN_MFRQ |       // Set TC5 mode as match frequency
+                           TC_CTRLA_PRESCALER_DIV1024 |  // Set prescaler to 1024
+                           TC_CTRLA_ENABLE;              // Enable TC5
+
   TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;          // Set TC5 value with ON Time (Stimulation)
   while (tcIsSyncing());
   
@@ -684,6 +707,23 @@ void Timer2_Reset()
 
 
 // .....................................................................................................................
+
+
+void SAMD21_Sleep()
+{
+  // Due to a hardware bug on the SAMD21, the SysTick interrupts become active before the flash has powered up from sleep, causing a hard fault
+  // To prevent this the SysTick interrupts are disabled before entering sleep mode
+  
+  SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;             // Disable SysTick interrupts
+  SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;                      // Put the SAMD21 in deep sleep upon executing the __WFI() function
+  SYSCTRL->VREG.bit.RUNSTDBY = 1;                         // Keep the voltage regulator in normal configuration during run stanby
+  SYSCTRL->OSC32K.bit.RUNSTDBY = 1;                       // Set the Internal 32KHz crystal to run standby mode
+  SYSCTRL->OSC8M.bit.RUNSTDBY = 1;                        // Set the Internal 8MHz crystal to run standby mode 
+  NVMCTRL->CTRLB.reg |= NVMCTRL_CTRLB_SLEEPPRM_DISABLED;  // Disable Auto Power Reduction During Sleep - SAMD21 Errata 1.14.2
+  __WFI();                                                // Put the SAMD21 into Deep Sleep, Zzzzzzzz...   
+  SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;              // Enable SysTick interrupts 
+  
+}
 
 
 // .....................................................................................................................
