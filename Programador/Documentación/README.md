@@ -22,3 +22,7 @@
 ### Versión actualizada de tesis
 - Comunicación exitosa entre NodeMcu y Arduino utilizando los módulos RF de 433 MHz. Los valores se envían de forma repetida. Se debe cambiar el código para resolver este problema.
 - Todas las secciones terminadas. 
+
+## Actualización 28 de septiembre 2020
+### Versión actualizada de tesis
+- Cambios solicitados por el asesor. Mejoras en el texto. 
