@@ -14,3 +14,6 @@
 
 ## Pruebas de comunicación entre PC (GUI en Python) y controlador de la varilla (NodeMcu) por medio de WiFi | 26 de septiembre de 2020
 - NMWiFi.py: archivo con genera la interfaz gráfica con capacidad de enviar los parámetros al controlador por medio de WiFi
+
+## Interfaz gráfica mejorada con soporte para comuniación por WiFi y/o comuniación serial (por USB) | 29 de septiembre de 2020
+- NewGUI.py: archivo que genera una interfaz gráfica mejorada con al capacidad de enviar parámetros al ESP8266 por medio de WiFi o por medio del cable USB.
