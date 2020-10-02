@@ -55,13 +55,13 @@ void loop() {
 
     /* MODO DE OPERACION */
     if(p10 == 1){
-      Serial2.println("Modo 1");
+      Serial2.println("Modo: Estimulacion");
     }
     else if(p10 == 2){
-      Serial2.println("Modo 2");
+      Serial2.println("Modo: Programacion");
     }
     else if(p10 == 3){
-      Serial2.println("Modo 3");
+      Serial2.println("Modo: Reposo");
     }
 
     /* MODIFICACION DEL ANCHO DE PULSO */
@@ -69,40 +69,41 @@ void loop() {
       analogWrite(11, 64);
       analogWrite(9, 64);
       analogWrite(3, 64);
-      Serial2.println("Ancho 25%");
+      Serial2.println("Ancho de pulso: 250 us");
     }
     else if(p20 == 01){ 
-      analogWrite(11, 77);
-      analogWrite(9, 77);
-      analogWrite(3, 77);
-      Serial2.println("Ancho 30%");
+      analogWrite(11, 64);
+      //analogWrite(11,128);
+      analogWrite(9, 64);
+      //analogWrite(3, 77);
+      Serial2.println("Ancho de pulso: 500 us");
     }
     else if(p20 == 10){
-      analogWrite(11, 127);
-      analogWrite(9, 127);
-      analogWrite(3, 127);
-      Serial2.println("Ancho 50%");
+      //analogWrite(11, 127);
+      //analogWrite(9, 127);
+      //analogWrite(3, 127);
+      Serial2.println("Ancho de pulso: 25% ");
     }
     else if(p20 == 11){
-      analogWrite(11, 192);
-      analogWrite(9, 192);
-      analogWrite(3, 192);
-      Serial2.println("Ancho 75%");
+      //analogWrite(11, 192);
+      analogWrite(9, 128);
+      //analogWrite(3, 192);
+      Serial2.println("Ancho de pulso: 50%");
     }
     else if(p20 == 100){
-      analogWrite(11, 255);
-      analogWrite(9, 255);
-      analogWrite(3, 255);
-      Serial2.println("Ancho 100%");
+      //analogWrite(11, 255);
+      //analogWrite(9, 255);
+      //analogWrite(3, 255);
+      Serial2.println("Ancho de pulso: 75%");
     }
     
 
     /* MODIFICACION DEL TIEMPO DE ESTIMULACION */
     if(p21 == 0){
-      Serial2.println("Tiempo 1");
+      Serial2.println("Tiempo: 30 s");
     }
     else if(p21 == 01){
-      Serial2.println("Tiempo 2");
+      Serial2.println("Tiempo: 60 s");
     }
     else if(p21 == 10){
       Serial2.println("Tiempo 3");
@@ -114,10 +115,11 @@ void loop() {
       Serial2.println("Tiempo 5");
     }
 
-    TCCR1B = TCCR1B & B11111000 | B00000011; // Frecuencia de 490.20 Hz en Pin 
+    TCCR1B = TCCR1B & B11111000 | B00000011; // Frecuencia de 490.20 Hz en Pin 11
     TCCR1B = TCCR1B & B11111000 | B00000011; 
 
     TCCR3B = TCCR3B & B11111000 | B00000011;    // set timer 3 divisor to    64 for PWM frequency of   490.20 Hz
+    
     /* MODIFICACION DE LA FRECUENCIA */
     if(p30 == 0){
       TCCR2B = TCCR2B & B11111000 | B00000100; // Frecuencia de 490.20 Hz en Pin 9/10
@@ -152,6 +154,15 @@ void loop() {
     else if(p30 == 111){
       Serial2.println("Frecuencia 8");
     }
+
+    /* TIEMPO APAGADO */
+    if(p31 == 0){
+      Serial2.println("Tiempo apagado: 5 min");
+    }
+    else if(p31 == 01){
+      Serial2.println("Sin tiempo apagado");
+    }
+
 
     
    

@@ -132,6 +132,13 @@ void loop() {
       lec3[0] = 111;
     }
 
+    if(freqsleep[1] == '1'){
+      lec3[1] = 0;
+    }
+    else if(freqsleep[1] == '2'){
+      lec3[1] = 01;
+    }
+
     int i = 0;
     while(i <= 2){
       if(i == 0){
