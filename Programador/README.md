@@ -3,7 +3,7 @@
 ## Carpeta - Codigo-Arduino
 En esta carpeta se almacenan todos los archivos de Arduino utilizados para pruebas de comunicación serial. Los archivos de Arduino deben ir en carpetas de su mismo nombre y por eso los archivos están en carpetas distintas dentro de ésta. 
 
-[sexo] (https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/PythonReadTry)
+[sexo](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/PythonReadTry)
 
 ## Carpeta - Codigo-Python
 En esta carpeta se almacenan los archivos de Python utilizados para envío de datos de manera serial y la creación de una interfaz gráfica y amigable. 
