@@ -8,8 +8,13 @@
 
   * [PyComTry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/PyComTry)
   * [PythonReadTry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/PythonReadTry)
+  
+      Archivos utilizados para la simulación de comunicación inalámbrica en Proteus. 
+      
   * [RFReceiveTry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/RFReceiveTry)
   * [RFSendTry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/RFSendTry)
+  
+      Archivos utilizados para comunicación inalámbrica entre dos Arduino Uno física utilizando módulos 433 MHz RF. 
   
 * [Código de Python](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python.py)
   * [ComAP_GUI](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/ComAP_GUI.py)
