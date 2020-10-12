@@ -2,6 +2,7 @@
 
 En este repositorio se encuentran los archivos utilizados para implementar el Módulo Programador del proyecto de Neuroestimulación del Nervio Vago trabajado en la Universidad del Valle de Guatemala. 
 
+## Distribución de los Archivos
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
 
   En esta carpeta se almacenan todos los archivos de Arduino utilizados para pruebas de comunicación serial. Los archivos de Arduino deben ir en carpetas de su mismo nombre y     por eso los archivos están en carpetas distintas dentro de ésta. 
