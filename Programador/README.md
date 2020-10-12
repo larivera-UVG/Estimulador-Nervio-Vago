@@ -1,6 +1,4 @@
-# En este folder están los archivos asociados al Programador
-
-
+# Repositorio para el Módulo Programador del proyecto VNS UVG
 
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
 
@@ -61,9 +59,3 @@
   
       Esquemático utilizado para la simulación de comunicación inalámbrica entre dos Arduino Uno en Proteus. 
   
-
-
-
-## Carpeta - Esquemáticos
-En esta carpeta se encuentran los archivos de Proteus y Altium, utilizados para simulación y creación de PCBs. 
-
