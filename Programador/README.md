@@ -1,4 +1,6 @@
-# Repositorio para el Módulo Programador del proyecto VNS UVG
+# Módulo Programador
+
+En este repositorio se encuentran los archivos utilizados para implementar el Módulo Programador del proyecto de Neuroestimulación del Nervio Vago trabajado en la Universidad del Valle de Guatemala. 
 
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
 
