@@ -11,10 +11,7 @@ El Módulo de Estimulación se implanta en el área pectoral y, mediante un cabl
 ### Módulo Programador
 El Módulo Programador sirve para poder comunicar las parámetros de estimulación (corriente de estimulación, tiempo de encendido y apagado, frecuencia de estimulación y ancho de pulso) al Módulo Estimulador. Estos parámetros se programan de forma inalámbrica utilizando módulos de comunicación por radiofrecuencia (RF). Para la programación inalámbrica de los parámetros se utiliza una varilla programadora a la cual se le cargan los parámetros de estimulación por medio de una aplicación (interfaz gráfica) para Windows programada en Python. Esta interfaz gráfica es amigable y fácil de usar para que el personal médico no tenga problemas al utilizarla. La interfaz gráfica puede cargar los parámetros a la varilla por medio de WiFi, y si la conexión no es posible, se puede conectar la varilla a la PC por medio de cable USB para la carga de parámetros. 
 
-![Diagrama][1]
-
-[1]: https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Imágenes/PruebasESP.png
-
+![Diagrama de Funcionamiento](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Imágenes/PruebasESP.png)
 
 ## Distribución de Archivos
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
