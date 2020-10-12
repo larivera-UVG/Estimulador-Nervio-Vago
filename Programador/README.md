@@ -9,10 +9,10 @@ El Sistema de Neuroestimulación del Nervio Vago (Sistema VNS) se divide en dos 
 El Módulo de Estimulación se implanta en el área pectoral y, mediante un cable con electrodos, se conecta al nervio vago. Por medio del cable se transmiten pulsos eléctricos al Nervio Vago, que lo estimulan para prevenir y abortar convulsiones epilépticas en camino o en proceso. Este módulo es trabajado por Gustavo Ordoñez y se puede acceder al repositorio en el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Estimulador).
 
 ### Módulo Programador
-El Módulo Programador sirve para poder comunicar las parámetros de estimulación (corriente de estimulación, tiempo de encendido y apagado, frecuencia de estimulación y ancho de pulso) al Módulo Estimulador. Estos parámetros se programan de forma inalámbrica utilizando módulos de comunicación por radiofrecuencia (RF). Para la programación de 
+El Módulo Programador sirve para poder comunicar las parámetros de estimulación (corriente de estimulación, tiempo de encendido y apagado, frecuencia de estimulación y ancho de pulso) al Módulo Estimulador. Estos parámetros se programan de forma inalámbrica utilizando módulos de comunicación por radiofrecuencia (RF). Para la programación inalámbrica de los parámetros se utiliza una varilla programadora a la cual se le cargan los parámetros de estimulación por medio de una aplicación (interfaz gráfica) para Windows programada en Python. Esta interfaz gráfica es amigable y fácil de usar para que el personal médico no tenga problemas al utilizarla. La interfaz gráfica puede cargar los parámetros a la varilla por medio de WiFi, y si la conexión no es posible, se puede conectar la varilla a la PC por medio de cable USB para la carga de parámetros. 
 
 
-## Distribución de los Archivos
+## Distribución de Archivos
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
 
   En esta carpeta se almacenan todos los archivos de Arduino utilizados para pruebas de comunicación serial. Los archivos de Arduino deben ir en carpetas de su mismo nombre y     por eso los archivos están en carpetas distintas dentro de ésta. 
