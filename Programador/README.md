@@ -17,6 +17,9 @@
       Archivos utilizados para comunicación inalámbrica entre dos Arduino Uno física utilizando módulos 433 MHz RF. 
   
 * [Código de Python](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python.py)
+
+    En esta carpeta se almacenan los archivos de Python utilizados para envío de datos por WiFi o por comunicación serial. Se genera una interfaz gráfica simple y amigable para     la selección de parámetros de estimulación. 
+    
   * [ComAP_GUI](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/ComAP_GUI.py)
   * [GUI_PP](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/GUI_PP.py)
   * [NMWiFi](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/NMWiFi.py)
@@ -43,19 +46,23 @@
   
   
 * [Documentación](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación)
+
+    En esta carpeta se encuentra la versión actualizada del trabajo escrito de la tesis (en formato pdf) y la documentación de los componentes utilizados. 
+    
   * [Tesis Miguel Alvarez](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación/Tesis%20Miguel%20Alvarez.pdf)
+      
+      Versión actualizada de tesis. 
   
 * [Esquemáticos](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos)
+
+    En esta carpeta se encuentran los archivos de Proteus y Altium utilizados para simulación de circuitos y creación de PCBs.
+    
   * [Esquemático de Proteus](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos/ByteRead.pdsprj)
+  
+      Esquemático utilizado para la simulación de comunicación inalámbrica entre dos Arduino Uno en Proteus. 
   
 
 
-## Carpeta - Codigo-Python
-En esta carpeta se almacenan los archivos de Python utilizados para envío de datos de manera serial y la creación de una interfaz gráfica y amigable. 
-
-
-## Carpeta - Documentación
-En esta carpeta se encuentra la versión actualizada del trabajo escrito de la tesis (en formato pdf) y toda la documentación de componentes utilizados.
 
 ## Carpeta - Esquemáticos
 En esta carpeta se encuentran los archivos de Proteus y Altium, utilizados para simulación y creación de PCBs. 
