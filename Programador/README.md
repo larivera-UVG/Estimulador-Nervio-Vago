@@ -1,6 +1,17 @@
-# Módulo Programador
+# Módulo Programador - Sistema VNS
 
 En este repositorio se encuentran los archivos utilizados para implementar el Módulo Programador del proyecto de Neuroestimulación del Nervio Vago trabajado en la Universidad del Valle de Guatemala. 
+
+## Funcionamiento del Neuroestimulador del Nervio Vago
+
+### Módulo de Estimulación 
+El Sistema de Neuroestimulación del Nervio Vago (Sistema VNS) se divide en dos módulos principales: Módulo de Estimulación y Módulo Programador. 
+
+El Módulo de Estimulación se implanta en el área pectoral y, mediante un cable con electrodos, se conecta al nervio vago. Por medio del cable se transmiten pulsos eléctricos al Nervio Vago, que lo estimulan para prevenir y abortar convulsiones epilépticas en camino o en proceso. Este módulo es trabajado por Gustavo Ordoñez y se puede acceder al repositorio en el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Estimulador)
+
+### Módulo Programador
+
+
 
 ## Distribución de los Archivos
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
