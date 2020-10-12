@@ -1,9 +1,9 @@
 # En este folder están los archivos asociados al Programador
 
-## Carpeta - Codigo-Arduino
-En esta carpeta se almacenan todos los archivos de Arduino utilizados para pruebas de comunicación serial. Los archivos de Arduino deben ir en carpetas de su mismo nombre y por eso los archivos están en carpetas distintas dentro de ésta. 
+
 
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
+...En esta carpeta se almacenan todos los archivos de Arduino utilizados para pruebas de comunicación serial. Los archivos de Arduino deben ir en carpetas de su mismo nombre y ...por eso los archivos están en carpetas distintas dentro de ésta. 
   * [PyComTry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/PyComTry)
   * [PythonReadTry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/PythonReadTry)
   * [RFReceiveTry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/RFReceiveTry)
