@@ -24,10 +24,23 @@
   * [ProteusCom](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/ProteusCom.py)
   
 * [Código de ESP8266](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266)
-  * [ESPAll](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/ESPAll)
-  * [ESPInt](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/ESPInt)
+  
+    En esta carpeta se almacenan los archivos de Arduino utilizados para pruebas con el ESP8266. Debido a que se programa desde el IDE de Arduino, los archivos deben en ir en       una carpeta con el mismo nombre.
+    
   * [NMRecRF](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/NMRecRF)
   * [NMTrnsmRF](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/NMTrnsmRF)
+  
+      Archivos para replicar lo logrado con los Arduino Uno. Comunicación PC-ESP866 por medio de comunicación serial y para la comunicación inalámbrica se usan los módulos RF de       433 MHz.
+      
+  * [ESPInt](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/ESPInt)
+  
+      Archivo que recibe los parámetros de estimulación por WiFi y no por comunicación serial. 
+
+  * [ESPAll](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/ESPAll)
+  
+      Archivo para comunicarse con la PC por medio de WiFi o por comunicación serial. 
+
+  
   
 * [Documentación](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación)
   * [Tesis Miguel Alvarez](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación/Tesis%20Miguel%20Alvarez.pdf)
@@ -40,8 +53,6 @@
 ## Carpeta - Codigo-Python
 En esta carpeta se almacenan los archivos de Python utilizados para envío de datos de manera serial y la creación de una interfaz gráfica y amigable. 
 
-## Carpeta - Codigo-ESP8266
-En esta carpeta se almacenan los archivos de Arduino utilizados para pruebas con el ESP8266. Debido a que se programa desde el IDE de Arduino, los archivos deben en ir en una carpeta con el mismo nombre.
 
 ## Carpeta - Documentación
 En esta carpeta se encuentra la versión actualizada del trabajo escrito de la tesis (en formato pdf) y toda la documentación de componentes utilizados.
