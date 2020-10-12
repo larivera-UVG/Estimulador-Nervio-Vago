@@ -13,7 +13,7 @@ El Módulo Programador sirve para poder comunicar las parámetros de estimulaci�
 
 ![Diagrama][1]
 
-[1]: https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Imágenes/DiagramaESP.png
+[1]: https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Imágenes/PruebasESP.png
 
 
 ## Distribución de Archivos
