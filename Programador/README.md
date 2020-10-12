@@ -26,7 +26,7 @@ En esta carpeta se almacenan todos los archivos de Arduino utilizados para prueb
   * [Tesis Miguel Alvarez](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación/Tesis%20Miguel%20Alvarez.pdf)
   
 * [Esquemáticos](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos)
-  * [Esquemático de Proteus](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos/ByteRead)
+  * [Esquemático de Proteus](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos/ByteRead.pdsprj)
   
 
 
