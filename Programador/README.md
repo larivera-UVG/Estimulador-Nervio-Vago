@@ -13,6 +13,8 @@ El Módulo Programador sirve para poder comunicar las parámetros de estimulaci�
 
 ![Diagrama de Funcionamiento](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Imágenes/PruebasESP.png)
 
+En este módulo se utilizó el ESP8266 como controlador de la varilla progamadora, para comunicarse con la aplicación de Python, por medio de WiFi o por comunicación serial y  Arduino Uno como simulación del controlador del Módulo Estimulador. 
+
 ## Distribución de Archivos
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
 
