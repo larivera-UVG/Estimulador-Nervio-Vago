@@ -9,3 +9,8 @@
 
 ## Soporte para comunicación por WiFi o por comunicación serial | 29 de septiembre de 2020
 - ESPAll.ino: se intenta conectar el ESP8266 a la red WiFi. Si la conexión es exitosa, se prepara para recibir los parámetros por medio de WiFi. Si la conexión no fue exitosa, se prepara para recibir los parámetros por medio del cable USB (comunicación serial). 
+
+## Actualización 22 de noviembre 2020
+- Se eliminaron los archivos NMTrnsmRF y ESPInt, ya que no son relevantes para el prototipo actual. 
+- Se movió el archivo NMRecRF a la carpeta de Código-Arduino. 
+- Se agregó la carpeta SPITry, con el código para implementación del módulo SPSGRF-868. 
