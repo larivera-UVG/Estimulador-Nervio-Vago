@@ -26,3 +26,11 @@
 ## Actualización 28 de septiembre 2020
 ### Versión actualizada de tesis
 - Cambios solicitados por el asesor. Mejoras en el texto. 
+
+## Actualización 22 de noviembre 2020
+- Versión actualizada de tesis
+- Manual de Usuario para el Módulo de Programación - Versión 0.1 
+
+### Documentación añadida de los componentes utilizados
+- SPSGRF.pdf: hoja de datos del módulo RF SPSGRF
+- spirit1.pdf: hoja de datos del módulo SPIRIT1, utilizado por el módulo SPSGRF

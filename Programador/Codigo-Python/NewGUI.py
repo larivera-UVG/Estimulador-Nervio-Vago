@@ -79,7 +79,7 @@ class VNS(tk.Tk): # Clase principal de la interfaz gráfica, el core de la GUI
         
         tk.Tk.__init__(self, *args, **kwargs)
         
-        tk.Tk.iconbitmap(self,"IconoUVG.ico") # Se coloca el icono de la UVG en la interfaz
+        #tk.Tk.iconbitmap(self,"IconoUVG.ico") # Se coloca el icono de la UVG en la interfaz
         tk.Tk.wm_title(self,"Sistema VNS - UVG") # Se coloca el título a la interfaz
         
         # Se declara el contenedor para la GUI
@@ -88,7 +88,7 @@ class VNS(tk.Tk): # Clase principal de la interfaz gráfica, el core de la GUI
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
         
-        #menubar = tk.Menu(container)
+        menubar = tk.Menu(container)
         #filemenu = tk.Menu(menubar, tearoff=0)
         #filemenu.add_command(label="Save settings", command = lambda: popupmsg("Not supported"))
         #filemenu.add_separator()
