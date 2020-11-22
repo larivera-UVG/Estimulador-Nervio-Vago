@@ -17,3 +17,6 @@
 
 ## Interfaz gráfica mejorada con soporte para comuniación por WiFi y/o comuniación serial (por USB) | 29 de septiembre de 2020
 - NewGUI.py: archivo que genera una interfaz gráfica mejorada con al capacidad de enviar parámetros al ESP8266 por medio de WiFi o por medio del cable USB.
+
+## Actualización 22 de noviembre de 2020
+- Solo se deja el archivo NewGUI que es el archivo que implementa el software de programación. 
