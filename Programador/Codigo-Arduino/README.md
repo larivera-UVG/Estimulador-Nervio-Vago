@@ -18,3 +18,8 @@
 - RFSendTry.ino: recibe los parámetros de la interfaz gráfica en Python y los envía por medio de un módulo RF (433 MHz) a otro Arduino.
 - RFReceiveTry.ino: recibe los parámetros del otro Arduino con el receptor RF y los interpreta para cambiar los parámetros de una señal PWM. 
 - Se eliminaron los archivos BuzzerControl.ino, SendTry.ino y ReadTry.ino pues ya no son utilizados.
+
+## Actualización 22 de noviembre de 2020
+- Se eliminaron los archivos PyComTry, PythonReadTry, RFReceiveTry y RFSendTry, ya que no son relevantes para el prototipo actual. 
+- NMRecRF.ino: código para el receptor de 433 MHz. El módulo receptor RF, conectado a un Arduino Uno, recibe los parámetros de estimulación y muestra en el monitor serial los parámetros recibidos.
+- SPITry: carpeta con la librería para uso del módulo SPSGRF-868. El código para el receptor y el transmisor tienen la misma base debido a que ambos módulos funcionan para ambos casos. 
