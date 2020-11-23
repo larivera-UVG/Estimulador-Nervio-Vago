@@ -13,7 +13,11 @@ El Módulo Programador sirve para poder comunicar las parámetros de estimulaci�
 
 ![Diagrama de Funcionamiento](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Imágenes/Prototipo3.png)
 
-En este módulo se utilizó el ESP8266 como controlador de la varilla progamadora, para comunicarse con la aplicación de Python, por medio de WiFi o por comunicación serial y  Arduino Uno como simulación del controlador del Módulo Estimulador. 
+En este módulo se utilizó el ESP8266 como controlador de la varilla progamadora, para comunicarse con la aplicación de Python, por medio de WiFi o por comunicación serial y  Arduino Uno como simulación del controlador del Módulo Estimulador.
+
+## Manual de Usuario 
+
+En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación/Manual%20de%20Usuario%20-%20Módulo%20de%20Programación%20V%200.1.pdf) se puede encontrar el Manual de Usuario Versión 0.1 para el Módulo de Programación. Este manual muestra la forma de instalación de los archivos y el uso correcto para poder programar los parámetros de estimulación en el generador de pulsos. 
 
 ## Distribución de Archivos
 * [Código de Arduino](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino)
