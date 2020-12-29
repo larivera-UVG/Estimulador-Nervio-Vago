@@ -1,4 +1,5 @@
- 
+ #include <SPI.h>
+
 // ............................................. PWM and Timer Formulas ................................................
 
 // PWM frequency:
@@ -42,31 +43,31 @@ volatile int OFF_Time;                // = ON_OFF_TIME[13];
 
 // ............................... Variables for PWM, Timer and Digital Potentiometer ..................................
 
-
-// Select Gen Clock to setting the waveform generator clock or sample rate
-const unsigned char gClock = 4;
-byte PWM_CLK; 
-
-const byte UD = 1;
-const byte INC = 2;
-const byte CS = 3;
-
 bool flag = 0;
 byte mode = 0;
+byte pulsos = 0;
 bool Ramp_mode = false; 
 bool go_to_sleep = false;
+bool update_mode = false;
+bool Hall_Sensor_Armed = false;
 
-int pulsos = 0;
-int amplitude_max = 98;
-int amplitude_min = 1;
+uint8_t amplitude;
+float output_voltage = 1.75;                        // Voltage (V)
+uint8_t frequency = 5;                              // Hertz (Hz)
+uint16_t Stimulation_time = 1;                      // Seconds (s)
+uint16_t Repose_time = 18;                          // Seconds (s)
 
-int amplitude;
-int frecuencia = 5;
-int Stimulation_time = 7;
-int Repose_time = 48;
+float magnet_output_voltage = 0.5;
+uint16_t magnet_Stimulation_time = 2;
 
 float ramp_interval;
 int timer_interval;
+int amplitude_max;                                  // Maximum Stimulation Amplitude (V)
+int amplitude_min = 0;                              // Minimum Stimulation Amplitude (V)
+ 
+uint16_t pot_command;
+uint16_t pot_value;
+
 
 // .....................................................................................................................
 
@@ -74,21 +75,24 @@ int timer_interval;
 void setup()
 {
 
-//PM->CPUSEL.reg = PM_CPUSEL_CPUDIV(4);
+  PM->CPUSEL.reg = PM_CPUSEL_CPUDIV(2);
 
 //...................................... Set Input/Output Pins Mode Configuration ......................................
   
-  pinMode(0, OUTPUT);                 // VNS Stimulation Signal Output
-  pinMode(UD, OUTPUT);                // U/'D
-  pinMode(INC, OUTPUT);               // 'INC
-  pinMode(CS, OUTPUT);                // 'CS
-
-  digitalWrite(UD, HIGH);
-  digitalWrite(INC, HIGH);
-
+  pinMode(0, OUTPUT);                                                     // VNS Stimulation Signal Output 
+  pinMode(1, INPUT_PULLUP);                                               // Input for Hall Sensor (open drain)
+  PORT->Group[PORTA].DIRSET.reg = PORT_PA03;                              // Set PA03 Pin as Output (CS SPI Communication)
+  PORT->Group[PORTA].OUTSET.reg = PORT_PA03;                              // Set PA03 Pin to High
+  //attachInterrupt(digitalPinToInterrupt(1), Hall_Sensor, FALLING);        // Configure Falling Interrupt for Hall Sensor
+  attachInterrupt(digitalPinToInterrupt(1), Hall_Sensor, RISING);          // Configure Rising Interrupt for Hall Sensor
+  
+  SPI.begin();                                                            // Enable SPI Communication
+  
 // .....................................................................................................................
 
-  switch (frecuencia) 
+  amplitude_max = output_voltage*(255/3.3)+4;
+  
+  switch (frequency) 
   { 
     case 1:
       period = PWM_freq[1][7];    
@@ -119,8 +123,8 @@ void setup()
       break;
   }
 
-  pulse_width = PWM_pw[1][0];
-  //pulse_width = period*0.5;
+  //pulse_width = PWM_pw[1][4];
+  pulse_width = period*0.5;
 
   switch (Stimulation_time) 
   { 
@@ -221,31 +225,25 @@ void setup()
       break;
   }
 
-  if (frecuencia >= 10)
-  {
-    Ramp_mode = true;  
-  }
-  else
-  {
-    Ramp_mode = false;  
-  }
+  if (frequency >= 10) Ramp_mode = true; 
+  else Ramp_mode = false;  
 
   
-//...................................... Configurare PWM (Stimulation signal) ..........................................
+//...................................... Configurate PWM (Stimulation signal) ..........................................
 
   PWM_Config();
   Enable_PWM_Interrupts();  
-  //PWM_Start();
-
-// ..................................... Configurar parametros de la rampa .............................................
+  
+// ......................... CONFIGURAR TIEMPO DE ACTUALIZACIÓN DE LA RAMPA ............................................
 
 if (Ramp_mode == true)
 {
-
-  amplitude = amplitude_min;                                  // Ramp-up Starts in Amplitude = 1
-  
+  // CCx = (time*(8MHz/1024))-1
+  // 1/time = (amplitude_max-1)/2000ms   
+   
+  amplitude = amplitude_min;                      // Ramp-up Starts in Amplitude = 1
   ramp_interval = (amplitude_max-1)/2;            // (98-1)/2s = 48.5Hz => 20.62ms
-  timer_interval = (7812.5/ramp_interval)-1;      // (46875.0/ramp_interval)-1;     // (46,875.0/48.5)-1 = 965.49 => 965 
+  timer_interval = (7812.5/ramp_interval)-1;      // (7812.5/ramp_interval)-1;     // (46,875.0/48.5)-1 = 965.49 => 965 
 
   Timer2_Config();                                // Configurate Timer for Ramp Amplitude Refresh
   Timer2_Interrupts();                            // Enable Ramp Amplitude Refresh
@@ -254,7 +252,6 @@ if (Ramp_mode == true)
 else
 {
   amplitude = amplitude_max;
-  //PWM_Start();
 }
 
 //...................................... Configurar Timer (ON/OFF Time) ................................................
@@ -263,8 +260,7 @@ else
   Timer_Start();    
 
 // .....................................................................................................................
-
-  //DAC_Init(); 
+  
   flag=1;
 
 }
@@ -276,10 +272,16 @@ else
 void loop() 
 {
 
-  if(flag==1)
+  if(update_mode)
+  {
+    next_mode();
+    update_mode = false;  
+  }
+
+  if(flag)
   {
     setResistance(amplitude);     
-    flag=0;
+    flag = false;
   }
 
   if(go_to_sleep)
@@ -291,42 +293,62 @@ void loop()
 }
 
 
-// .....................................................................................................................
+// ............................. HALL Sensor Activation for On Demand Mode .............................................
+
+
+void Hall_Sensor()
+{
+
+  mode = 0;
+  flag = 0;
+  pulsos = 0;
+  go_to_sleep = false;
+  
+  if(Ramp_mode) amplitude = amplitude_min;
+  else amplitude = amplitude_max;
+
+  flag = true;
+  update_mode = true;
+  
+}
+
+// ............................. TIMER DE ACTUALIZACIÓN DE AMPLITUD DE LA RAMPA ........................................
 
 
 void TCC0_Handler()
 {
 
-  if(mode==2)
+  if(mode==2)                                 // ¿Intevalo de Estimulación?
   {
-    pulsos++;
-    if(pulsos==frecuencia) 
+    pulsos++;                                 // Contar pulsos realizados
+    
+    if(pulsos==frequency)                     // ¿# de pulsos coinciden con la frecuencia configurada?
     {
-      pulsos=0;
-      if(Ramp_mode == true) amplitude--;
-      flag=1;     
+      pulsos=0;                               // Reiniciar contador de pulsos
+      if(Ramp_mode == true) amplitude--;      // Disminuir amplitud para entrar en rampa de bajada
+      flag=1;                                 // Actualizar amplitud del poteciometro
     } 
      
   }
 
-  TCC0->INTFLAG.bit.MC0 = 1;                            // Clear interrupt flag
+  TCC0->INTFLAG.bit.MC0 = 1;                  // Clear interrupt flag
   
 }
 
 
-// .....................................................................................................................
+// ............................. TIMER PARA GENERAR SEÑAL PWM DE ESTIMULACIÓN ..........................................
 
 
 void TCC1_Handler()
 {
 
-  if(mode==1) amplitude++;              // Increment Amplitude for Ramp-up 
-  else if(mode==3) amplitude--;         // Decrement Amplitude for Ramp-down
+  if(mode==1) amplitude++;              // ¿Rampa de subida? -> Incrementar Amplitud 
+  else if(mode==3) amplitude--;         // ¿Rampa de bajada? -> Decrementar Amplitud
 
   if(amplitude > amplitude_max) amplitude = amplitude_max;  
   if(amplitude < amplitude_min) amplitude = amplitude_min;
+  
   flag = 1;
-
   TCC1->INTFLAG.bit.MC0 = 1;            
   
 }
@@ -335,101 +357,90 @@ void TCC1_Handler()
 // .....................................................................................................................
 
 
-void setResistance(int percent){ 
-  digitalWrite(UD, LOW);                // Select Decrement Counter
-  digitalWrite(CS, LOW);                // Select Digital Potenciometer
-    
-  for (int i=0; i<100; i++){            // Increment/Decrement Counter
-    digitalWrite(INC, LOW);             // Low State (this gives a negative edge)
-    delayMicroseconds(5);               
-    digitalWrite(INC, HIGH);            // High State 
-    delayMicroseconds(5);
-  }
+void setResistance(int percent)
+{
+   
+  pot_command = 0x0011;                                             // Write Command to Potentiometer
+  pot_value = (pot_command << 8) | percent;                         // Add Potentiometer Value to Write Command
 
-  digitalWrite(UD, HIGH);               // Select Increment Counter
-  for (int i=0; i<percent; i++){        // Increment/Decrement Counter
-    digitalWrite(INC, LOW);             // Low State (this gives a negative edge)
-    delayMicroseconds(5);
-    digitalWrite(INC, HIGH);            // High State 
-    delayMicroseconds(5);
-  }
+  PORT->Group[PORTA].OUTCLR.reg = PORT_PA03;                        // Set Potentiometer CS Pin to Low
+  delayMicroseconds(50);                                            // Delay
+  
+  SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));  // Begin SPI Transaction  
+  SPI.transfer16(pot_value);                                        // Write New Value to Potentiometer
+  SPI.endTransaction();                                             // End SPI Transaction
+  
+  delayMicroseconds(50);                                            // Delay
+  PORT->Group[PORTA].OUTSET.reg = PORT_PA03;                        // Set Potentiometer CS Pin to High
 
-  //digitalWrite(CS, HIGH);               // Save counter in non-volatile memory and enter in Stand-By Mode
 }
 
 
 // .....................................................................................................................
 
 
-void TC5_Handler (void) {
+void TC5_Handler (void) 
+{
 
-  if(Ramp_mode == true)
-  {
-    mode++;                                             // Ramp Up -> ON Time -> Ramp Down -> OFF Time
-    if(mode>=5) mode=1;                                 // Reset Stimultation Sequence    
-  }
-  else
-  {
-    if(mode==2) mode = 4;                               // ON Time -> OFF Time
-    else if(mode==4) mode = 2;
-    else mode = 2;                                      // Reset Stimultation Sequence 
-  } 
-
-  
-  if(mode == 1)
-  {
-    
-    Timer_Disable();                                    // Stop Timer to change to Ramp Up Time (2S)
-    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Up Time (2S)   
-    PWM_Start();                                        // Start PWM
-    Timer_Start();                                      // Enable Timer again    
-
-    Timer2_Start();                                     // Update Ramp Amplitude
-    
-  }
-  else if(mode == 2)
-  {
-
-    Timer2_Stop();
-    
-    pulsos=0;
-    Timer_Disable();                                    // Stop Timer to change to ON time value       
-    TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)    
-    if(Ramp_mode == false) PWM_Start();                 // Enable PWM 
-    Timer_Start();                                      // Enable Timer again    
-     
-  } 
-  else if(mode == 3) 
-  { 
-       
-    Timer_Disable();                                    // Stop Timer to change to Ramp Down Time
-    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Down Time    
-    Timer_Start();                                      // Enable Timer again     
-
-    Timer2_Start();                                     // Update Ramp Amplitude
-                  
-  }
-  else if(mode == 4)
-  {
-
-    Timer2_Stop();
-    
-    PWM_Stop();                                         // Disable PWM     
-    Timer_Disable();                                    // Stop Timer to change to OFF Time Value
-    TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
-    Timer_Start();                                      // Enable Timer again    
-    digitalWrite(0, LOW);     
-
-    go_to_sleep = true;
-    
-  }
-       
+  update_mode = true;
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;                     // Clear interrupt flag  
   
 }
 
 
 // .....................................................................................................................
+
+
+void next_mode(void)
+{
+  
+  if(Ramp_mode)                                         // Ramp Mode On?
+  {                                                     // Ramp Mode On (Freq. >= 10):
+    mode++;                                             // Use Sequence: Ramp Up -> On Time -> Ramp Down -> Off Time
+    if(mode>=5) mode=1;                                 // Reset Stimultation Sequence    
+  }
+  else                                                  
+  {                                                     // Ramp Mode Off (Freq. < 10):
+    if(mode==2) mode = 4;                               // Use Sequence: On Time -> Off Time
+    else mode = 2;                                      // Reset Stimultation Sequence 
+  } 
+
+  
+  if(mode == 1)                                         // Ramp Up Interval Active?
+  {    
+    Timer_Disable();                                    // Stop Timer to change to Ramp Up Time (2s)
+    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Up Time (2s)   
+    PWM_Start();                                        // Start PWM  (Stimulation Signal)
+    Timer_Start();                                      // Enable Timer again    
+    Timer2_Start();                                     // Update Up Ramp Amplitude Interval     
+  }
+  else if(mode == 2)                                    // On Time Interval Active?
+  {
+    Timer2_Stop();                                      // Stop Update of Ramp Amplitude 
+    pulsos=0;                                           // Reset Stimulation Pulses Count
+    Timer_Disable();                                    // Stop Timer to change to ON time value       
+    TC5->COUNT16.CC[0].reg = (uint16_t) ON_Time;        // Set TC5 value with ON Time (Stimulation)    
+    if(Ramp_mode == false) PWM_Start();                 // Enable PWM 
+    Timer_Start();                                      // Enable Timer again    
+  } 
+  else if(mode == 3)                                    // Down Up Interval Active?
+  {    
+    Timer_Disable();                                    // Stop Timer to change to Ramp Down Time
+    TC5->COUNT16.CC[0].reg = (uint16_t) 62;             // Set TC5 value with Ramp Down Time    
+    Timer_Start();                                      // Enable Timer again     
+    Timer2_Start();                                     // Update Down Ramp Amplitude                  
+  }
+  else if(mode == 4)                                    // Off Time Interval Active?
+  {
+    Timer2_Stop();                                      // Stop Update of Ramp Amplitude   
+    PWM_Stop();                                         // Disable PWM     
+    Timer_Disable();                                    // Stop Timer to change to OFF Time Value
+    TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;       // Set TC5 value with OFF Time (Repose)    
+    Timer_Start();                                      // Enable Timer again        
+    //go_to_sleep = true;                                 // Enter in Standy Mode to Save Energy
+  }
+    
+}
 
 
 void PWM_Config()
@@ -442,14 +453,14 @@ void PWM_Config()
   // Enable and configure the Generic CLK Generator (GCLK)
   GCLK->GENCTRL.reg = GCLK_GENCTRL_IDC |                  // Improve duty cycle 
                       GCLK_GENCTRL_GENEN |                // Enable GCLK
-                      GCLK_GENCTRL_SRC_OSC8M |            //DFLL48M |           // OSC32K | OSC8M | DFLL48M |   // Set the 48MHz as Clock Source
-                      GCLK_GENCTRL_ID(gClock);            // Select GCLK4 as ID 
+                      GCLK_GENCTRL_SRC_OSC8M |            // OSC32K | OSC8M | DFLL48M |   // Set the 8MHz as Clock Source
+                      GCLK_GENCTRL_ID(4);                 // Select GCLK4 as ID 
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
 
   // Select clock divider to GCLK4
-  GCLK->GENDIV.reg = GCLK_GENDIV_DIV(1) |                 // Divide 48MHz by 1 
-                     GCLK_GENDIV_ID(gClock);              // Apply it to GCLK4    
+  GCLK->GENDIV.reg = GCLK_GENDIV_DIV(1) |                 // Divide 8MHz by 1 
+                     GCLK_GENDIV_ID(4);                   // Apply it to GCLK4    
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
   
@@ -460,7 +471,7 @@ void PWM_Config()
   while (GCLK->STATUS.bit.SYNCBUSY);                      // Wait for synchronization
 
 
-  TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV256;    //DIV1024;         // Divide counter by 1 (This is N)
+  TCC0->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV256;          // Divide counter by 1 (This is N)
   TCC0->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;               // Set Timer counter Mode to 16 bits
   TCC0->WAVE.reg = TCC_WAVE_WAVEGEN_NPWM;                 // Select NPWM (Single-slope): count up to PER, match on CC[n]
   while (TCC0->SYNCBUSY.bit.WAVE);                        // Wait for synchronization
@@ -481,9 +492,6 @@ void PWM_Config()
   // Odd pin num (2*n+1): use PMUXO
   // Even pin num (2*n): use PMUXE
   PORT->Group[PORTA].PMUX[4].reg = PORT_PMUX_PMUXE_E;
-
-//  REG_TCC1_INTENSET = TCC_INTENSET_OVF;
-//  enable_interrupts();
   
 }
 
@@ -509,8 +517,8 @@ void Enable_PWM_Interrupts(void)
 
 void PWM_Start()
 { 
-  TCC0->CTRLA.reg |= (TCC_CTRLA_ENABLE);              // Enable TCC1 (Start PWM)
-  while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization     
+  TCC0->CTRLA.reg |= (TCC_CTRLA_ENABLE);                // Enable TCC1 (Start PWM)
+  while (TCC0->SYNCBUSY.bit.ENABLE);                    // Wait for synchronization     
 }
 
 
@@ -519,8 +527,8 @@ void PWM_Start()
 
 void PWM_Stop()
 {
-  TCC0->CTRLA.reg &= (~TCC_CTRLA_ENABLE);             // Disable TCC1 (Stop PWM)
-  while (TCC0->SYNCBUSY.bit.ENABLE);                  // Wait for synchronization
+  TCC0->CTRLA.reg &= (~TCC_CTRLA_ENABLE);               // Disable TCC1 (Stop PWM)
+  while (TCC0->SYNCBUSY.bit.ENABLE);                    // Wait for synchronization
 }
 
 
@@ -564,21 +572,19 @@ void Timer_Config()
   TC5->COUNT16.CC[0].reg = (uint16_t) OFF_Time;          // Set TC5 value with ON Time (Stimulation)
   while (tcIsSyncing());
   
-  // Configure interrupt request
-  NVIC_DisableIRQ(TC5_IRQn);
+  NVIC_DisableIRQ(TC5_IRQn);                             // Configure Interrupt Request
   NVIC_ClearPendingIRQ(TC5_IRQn);
   NVIC_SetPriority(TC5_IRQn, 0);
   NVIC_EnableIRQ(TC5_IRQn);
   
-  TC5->COUNT16.INTENSET.bit.MC0 = 1;           // Enable TC5 Overflow Interrupt Request (OVF)
-  while (tcIsSyncing());                       // Wait until TC5 is done syncing 
+  TC5->COUNT16.INTENSET.bit.MC0 = 1;                     // Enable TC5 Overflow Interrupt Request (OVF)
+  while (tcIsSyncing());                                 // Wait until TC5 is done syncing 
 } 
 
 
 // .....................................................................................................................
 
 
-// Check if TC5 syncing is done (true)
 bool tcIsSyncing()
 {
   return TC5->COUNT16.STATUS.reg & TC_STATUS_SYNCBUSY;
@@ -590,8 +596,8 @@ bool tcIsSyncing()
 
 void Timer_Start()
 {
-  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    // set the CTRLA register
-  while (tcIsSyncing());                        // wait until snyc'd
+  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;            // set the CTRLA register
+  while (tcIsSyncing());                                // wait until snyc'd
 }
 
 
@@ -654,7 +660,7 @@ void Timer2_Config()
   TCC1->CTRLA.reg |= TCC_CTRLA_PRESCALER_DIV1024;         // Divide counter by 1 (This is N)
   while (TCC1->SYNCBUSY.bit.WAVE);                        // Wait for synchronization
 
-  TCC1->CC[0].reg = timer_interval; //961;                // Set PWM signal to 50% of duty cicle 
+  TCC1->CC[0].reg = timer_interval;                       // Set PWM signal to 50% of duty cicle 
   while (TCC1->SYNCBUSY.bit.CC0);                         // Wait for synchronization
 
 }
@@ -714,14 +720,14 @@ void SAMD21_Sleep()
   // Due to a hardware bug on the SAMD21, the SysTick interrupts become active before the flash has powered up from sleep, causing a hard fault
   // To prevent this the SysTick interrupts are disabled before entering sleep mode
   
-  SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;             // Disable SysTick interrupts
-  SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;                      // Put the SAMD21 in deep sleep upon executing the __WFI() function
-  SYSCTRL->VREG.bit.RUNSTDBY = 1;                         // Keep the voltage regulator in normal configuration during run stanby
-  SYSCTRL->OSC32K.bit.RUNSTDBY = 1;                       // Set the Internal 32KHz crystal to run standby mode
-  SYSCTRL->OSC8M.bit.RUNSTDBY = 1;                        // Set the Internal 8MHz crystal to run standby mode 
-  NVMCTRL->CTRLB.reg |= NVMCTRL_CTRLB_SLEEPPRM_DISABLED;  // Disable Auto Power Reduction During Sleep - SAMD21 Errata 1.14.2
-  __WFI();                                                // Put the SAMD21 into Deep Sleep, Zzzzzzzz...   
-  SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;              // Enable SysTick interrupts 
+  SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;               // Disable SysTick interrupts
+  SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;                        // Put the SAMD21 in deep sleep upon executing the __WFI() function
+  //SYSCTRL->VREG.bit.RUNSTDBY = 1;                         // Keep the voltage regulator in normal configuration during run stanby
+  SYSCTRL->OSC32K.bit.RUNSTDBY = 1;                         // Set the Internal 32KHz crystal to run standby mode
+  //SYSCTRL->OSC8M.bit.RUNSTDBY = 1;                        // Set the Internal 8MHz crystal to run standby mode 
+  NVMCTRL->CTRLB.reg |= NVMCTRL_CTRLB_SLEEPPRM_DISABLED;    // Disable Auto Power Reduction During Sleep - SAMD21 Errata 1.14.2
+  __WFI();                                                  // Put the SAMD21 into Deep Sleep, Zzzzzzzz...   
+  SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;                // Enable SysTick interrupts 
   
 }
 
