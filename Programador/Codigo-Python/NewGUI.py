@@ -1,20 +1,25 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+
 """
 NewGUI.py
 
 Basado en el código de TutoElectro: Tutorial_ESP8266_Python_1
 Canal de youtube: https://www.youtube.com/c/Tutoelectro1/featured
 
-Y también el código de Sentedex, lista de reproducción: GUIs with Tkinter (intermediate)
+Y también el código de Sentdex, lista de reproducción: GUIs with Tkinter (intermediate)
 Canal de youtube: https://www.youtube.com/c/sentdex/featured
 
 Miguel Alfonso Alvarez Sierra - 16168
 Ingeniería Mecatrónica - UVG
 """
 
+
 ##############################################################################
 # LIBRERIAS UTILIZADAS
 ##############################################################################
 import socket # Librería socket para poder comunicarse con el ESP8266 por medio de WiFi
+import select
 
 import serial # Librería para comunicación serial 
 import serial.tools.list_ports # Módulo para poder ver los puertos seriales
@@ -45,12 +50,12 @@ delay = 2
 comUSB = 0 # Confirmación de comuniación con USB
 
 # Listas que incluyen las opciones programables de los parámetros de estimulación
-anchopts = ["25%", "30%", "50%", "75%", "100%"]
+anchopts = ["250\u03BCs", "500\u03BCs", "25%", "50%", "75%"]
 freqopts = ["490.20 Hz", "30.64 Hz", "122.50 Hz", "245.10 Hz", 
             "980.39 Hz", "3921.16 Hz", "31372.55 Hz", "Frecuencia 8"]
 opmodopts = ["Estimulación", "Imán", "Reposo"]
-timeopts = ["Tiempo 1", "Tiempo 2", "Tiempo 3", "Tiempo 4", "Tiempo 5"]
-sleepopts = ["Sleep 1", "Sleep 2"]
+timeopts = ["30 s", "60 s", "Tiempo 3", "Tiempo 4", "Tiempo 5"]
+sleepopts = ["5 min", "NO"]
 
 ##############################################################################
 # FUNCIONES GENERALES
@@ -88,18 +93,18 @@ class VNS(tk.Tk): # Clase principal de la interfaz gráfica, el core de la GUI
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
         
-        menubar = tk.Menu(container)
+        #menubar = tk.Menu(container)
         #filemenu = tk.Menu(menubar, tearoff=0)
         #filemenu.add_command(label="Save settings", command = lambda: popupmsg("Not supported"))
         #filemenu.add_separator()
         #menubar.add_cascade(label="File", menu=filemenu)
         
-        tk.Tk.config(self, menu=menubar)
+        #tk.Tk.config(self, menu=menubar)
         
         self.frames = {}
         
         # Se declaran la cantidad de páginas (ventanas) diferentes 
-        for F in (StartPage, PageOne, PageTwo):
+        for F in (StartPage, PageOne, PageTwo, PageThree):
     
             frame = F(container, self)
             
@@ -124,18 +129,20 @@ class StartPage(tk.Frame): # Página de inicio
         
         label = tk.Label(self, text="BIENVENIDO",font=LARGE_FONT) # Mensaje de bienvenida
         label.grid(row=0,column=3)
-        label2 = tk.Label(self, text="Por favor seleccionar una opción de conexión",font=NORM_FONT)
         # Se pide al usuario seleccionar la opción de conexión: wifi o usb
+        label2 = tk.Label(self, text="Por favor seleccionar una opcion de conexion",font=NORM_FONT)
         label2.grid(row=1,column=3)
         
-        global ESP_IP
-        ESP_IP = '192.168.0.10' # Se indica la IP a la que se quiere conectar (la del ESP8266)
+        
+        #global ESP_IP
+        #ESP_IP = '192.168.0.19' # Se indica la IP a la que se quiere conectar (la del ESP8266)
+        #ESP_IP = input("Ingrese IP: ")
 
-        global ESP_PORT
-        ESP_PORT = 8266 # Puerto en el que se abrirá la comunicación
+        #global ESP_PORT
+        #ESP_PORT = 8266 # Puerto en el que se abrirá la comunicación
 
-        global s
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Creación del objeto socket
+        #global s
+        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Creación del objeto socket
         
         def get_ports(): # Función para ver los puertos activos
             ports = serial.tools.list_ports.comports() # Ports guarda la lista de puertos
@@ -217,15 +224,22 @@ class StartPage(tk.Frame): # Página de inicio
                 messageNoWiFi()
             else:
                 succesfulWiFi()
-        
      
-        button = ttk.Button(self, text="Conectar por medio de WiFi",
-                            command=connectTry)
-        button.grid(row=2, column=3,sticky="ew") # Fila 1, columna 0
+        
+        #button = ttk.Button(self, text="Conectar por medio de WiFi",
+        #                    command=connectTry)
+        #button = ttk.Button(self, text="Conectar por medio de WiFi",command=lambda: controller.show_frame(PageThree))
+        #button.grid(row=2, column=3,sticky="ew") # Fila 1, columna 0
         
         button2 = ttk.Button(self, text="Conectar por medio de cable USB",
                             command=autoPorts)
         button2.grid(row=3, column=3,sticky="ew") # Fila 1, columna 0
+        
+        button3 = ttk.Button(self, text="Conectar por medio de WiFi",
+                            command=lambda: controller.show_frame(PageThree))
+        button3.grid(row=2, column=3,sticky="ew") # Fila 1, columna 0
+        
+                    
         
         def succesfulWiFi():
             win = tk.Toplevel()
@@ -236,6 +250,7 @@ class StartPage(tk.Frame): # Página de inicio
             label.grid(row=2,column=2)
             
             buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PageTwo))
+            #buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PagePassword))
             buttonWiFi.grid(row=3,column=2,sticky="ew")
         
         def succesfulSerial():
@@ -273,14 +288,14 @@ class StartPage(tk.Frame): # Página de inicio
             
             buttonSalir = ttk.Button(win, text="Salir de la aplicación", command=destroyAll)
             buttonSalir.grid(row=3,column=0,sticky="ew")
-   
+            
+            
 class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         label = ttk.Label(self, text="Page One",font=LARGE_FONT)
-        
-            
+                    
         def clear_all(): # Funcion para el boton que cierra el puerto y la ventana de
                     # la interfaz grafica
             ser.close() # Se cierra el puerto serial
@@ -410,7 +425,7 @@ class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
         btn_Cierre = ttk.Button(self, text="CERRAR APP",command=clear_all) # Botón para cerrar la interfaz  
         btn_Cierre.grid (row=9, column=0,columnspan=2,sticky="ew") # Ubicación del botón
         
-        
+
 class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
     
     def __init__(self, parent, controller):
@@ -488,11 +503,60 @@ class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
             s.send(time.encode(encoding='utf_8'))
             s.send(freq.encode(encoding='utf_8'))  
             s.send(sleep.encode(encoding='utf_8'))
-        
+            
             print("Parámetros enviados") # Se muestra en la consola la confirmación del
                                 # envío de parámetros
-        
-        
+            
+            condRetWi = True 
+            
+            while(condRetWi == True):
+                socket_list = [s]
+                
+                rs, ws, es = select.select(socket_list,[],[],0)
+                
+                for sock in rs: 
+                    if sock == s:
+                        dataIn = sock.recv(1024)
+                        print("Recibido")
+                        print(dataIn)
+                        condRetWi = False
+                        
+            dataInt = int(dataIn)
+            if(dataInt == 1):
+                succesfulParam()
+            else:
+                unsuccesfulParam()
+                
+        def succesfulParam():
+            win = tk.Toplevel()
+            win.title("PARAMETROS RECIBIDOS")
+            
+            def winDestruccion():
+                win.destroy()
+            
+            message = "Módulo de Estimulación dice: Parámetros Recibidos" 
+            label = tk.Label(win, text=message,font=SMALL_FONT)
+            label.grid(row=2,column=2)
+            
+            buttonSi = ttk.Button(win, text="Cerrar Ventana",command=winDestruccion)
+            buttonSi.grid(row=3,column=2,sticky="ew")
+            
+        def unsuccesfulParam(): 
+            win = tk.Toplevel()
+            win.title("FALLO EN COMUNICACION RF")
+            
+            def winDestruccion():
+                win.destroy()
+            
+            message = "Módulo de Estimulación dice: Fallo en recepción de Parámetros" 
+            label = tk.Label(win, text=message,font=SMALL_FONT)
+            label.grid(row=2,column=2)
+            
+            buttonNo = ttk.Button(win, text="Cerrar Ventana",command=winDestruccion)
+            buttonNo.grid(row=3,column=2,sticky="ew")
+            
+            
+            
         cl1 = tk.StringVar()
         cl1.set(opmodopts[0])
 
@@ -545,9 +609,129 @@ class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
 
         btn_Cierre = ttk.Button(self, text="CERRAR APP",command=clear_all) # Botón para cerrar la interfaz  
         btn_Cierre.grid (row=9, column=0,columnspan=2,sticky="ew") # Ubicación del botón
+   
+    
+class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
+    
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page Three",font=LARGE_FONT)
         
+        label = tk.Label(self, text="CODIGO",font=LARGE_FONT) # Mensaje de bienvenida
+        label.grid(row=0,column=0)
+        label2 = tk.Label(self, text="Ingrese el codigo de la Varilla Programadora",font=NORM_FONT)
+        # Se pide al usuario seleccionar la opción de conexión: wifi o usb
+        label2.grid(row=1,column=0)
         
+        global ESP_IP
+        #ESP_IP = '192.168.0.19' # Se indica la IP a la que se quiere conectar (la del ESP8266)
+        #ESP_IP = input("Ingrese IP: ")
+
+        global ESP_PORT
+        ESP_PORT = 8266 # Puerto en el que se abrirá la comunicación
+
+        global s
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Creación del objeto socket
+
+
+        def isOpen(ip, port):
+            s.settimeout(timeout)
+            try:
+                s.connect((ip, int(port)))
+                return True
+            except:
+                return False
+
+        def checkHost(ip, port):
+            ipup = False
+            for i in range(retry):
+                if isOpen(ip, port):
+                    ipup = True
+                    break
+                else:
+                    time.sleep(delay)
+            return ipup
         
+        def connectTry():
+            ESP_IP = e.get()
+            WiFiConnection = False
+            if checkHost(ESP_IP, ESP_PORT):
+                print(ESP_IP + " está activo")
+                WiFiConnection = True
+            else:
+                print("Conexión fallida")
+                print("Por favor conectar cable USB")
+                WiFiConnection = False
+
+            if(WiFiConnection == False):
+                messageNoWiFi()
+            else:
+                succesfulWiFi()
+     
+        
+        button = ttk.Button(self, text="Conectar por medio de WiFi",
+                            command=connectTry)
+        #button = ttk.Button(self, text="Conectar por medio de WiFi",command=lambda: controller.show_frame(PageThree))
+        button.grid(row=3, column=0,sticky="ew") # Fila 1, columna 0
+        
+ 
+        def succesfulWiFi():
+            win = tk.Toplevel()
+            win.title("CONEXION POR WIFI EXITOSA")
+            
+            message = "Se ha logrado la comunicación por WiFi"
+            label = tk.Label(win, text=message,font=LARGE_FONT)
+            label.grid(row=2,column=2)
+            
+            buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PageTwo))
+            #buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PagePassword))
+            buttonWiFi.grid(row=3,column=2,sticky="ew")
+        
+        def succesfulSerial():
+            win = tk.Toplevel()
+            win.title("CONEXION POR USB EXITOSA")
+            
+            message = "Se ha logrado la comunicación por cable USB"
+            label = tk.Label(win, text=message,font=NORM_FONT)
+            label.grid(row=2,column=2)
+            
+            buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PageOne))
+            buttonWiFi.grid(row=3,column=2,sticky="ew")
+            
+        def messageNoWiFi():
+            win = tk.Toplevel()
+            win.title('ERROR: SIN WIFI')
+    
+            def popupWiFi():
+                
+                win.destroy()
+        
+            def destroyAll():
+                win.destroy()
+                app.destroy()
+    
+            message = "No se pudo conectar con ESP8266 por medio de WiFi." 
+            message2 = "Conectar cable USB."
+            label = tk.Label(win, text=message,font=NORM_FONT)
+            label.grid(row=0,column=0)
+            
+            label2 = tk.Label(win, text=message2,font=NORM_FONT)
+            label2.grid(row=1,column=0)
+            #Label(win, text=message).pack()
+            buttonUSB = ttk.Button(win, text="Por favor, seleccionar la opción para conexión por cable USB",command=lambda: controller.show_frame(StartPage))
+            buttonUSB.grid(row=2,column=0,sticky="ew")
+            
+            buttonAgain = ttk.Button(win, text="Intentar código de nuevo",command=popupWiFi)
+            buttonAgain.grid(row=3,column=0,sticky="ew")
+            
+            buttonSalir = ttk.Button(win, text="Salir de la aplicación", command=destroyAll)
+            buttonSalir.grid(row=4,column=0,sticky="ew")
+            
+        e = tk.Entry(self, width=50)
+        e.grid(row=2, column=0, sticky="ew")
+
+
+      
 app = VNS()
 app.geometry("450x250")
 app.mainloop()
