@@ -30,7 +30,6 @@ from tkinter import ttk # Parte de la librería para mejorar el aspecto
 import urllib # Librería para utilizar url
 from urllib.request import urlopen # Parte de la librería para abrir un url
 
-#import json
 import time # Librería para poder utilizar delays 
 
 ##############################################################################
@@ -56,23 +55,6 @@ freqopts = ["490.20 Hz", "30.64 Hz", "122.50 Hz", "245.10 Hz",
 opmodopts = ["Estimulación", "Imán", "Reposo"]
 timeopts = ["30 s", "60 s", "Tiempo 3", "Tiempo 4", "Tiempo 5"]
 sleepopts = ["5 min", "NO"]
-
-##############################################################################
-# FUNCIONES GENERALES
-##############################################################################
-
-def is_internet(): # Función para probar conexión a internet
-    try: # Se intenta abrir el url (google es el más simple)
-        urlopen('https://www.google.com', timeout = 1)
-        return True # Si se pudo abrir se regresa True
-    except urllib.error.URLError as Error:
-        return False # Si no se pudo abrir se regresa False
-
-def try_internet(): # Función para indicar estado de la conexión a internet al usuario           
-    if is_internet(): # Si se pudo abrir el url
-        print("Conexión a Internet exitosa") # Se muestra conexión exitosa
-    else: # Si no
-        print("No está conectado a Internet") # Se muestra conexión fallida
 
 ##############################################################################
 # CODIGO DE LA INTERFAZ GRAFICA
@@ -175,12 +157,15 @@ class StartPage(tk.Frame): # Página de inicio
             foundPorts = get_ports()
             connectPort = findArduino(foundPorts) # Se busca el puerto del Arduino
 
-            print("Intentando conectar con ESP8266 USB")
+            #print("Intentando conectar con ESP8266 USB")
     
             while(connectPort == 'None'): # Si no se puede conectar con el ESP8266
+            #if(connectPort == 'None'):
                 print("Conexión fallida. Revisar la conexión.")
                 print("")
                 time.sleep(2) # Se intenta conectar otra vez a los dos segundos
+                #noSerial()
+                
                 foundPorts = get_ports() # Se obtienen los puertos disponibles
                 connectPort = findArduino(foundPorts) # Se busca el puerto del Arduino
                 print("Intentado conectar con ESP8266 USB")
@@ -190,7 +175,7 @@ class StartPage(tk.Frame): # Página de inicio
                 global ser
                 ser = serial.Serial(connectPort, 115200) # Se conecta a éste
                 succesfulSerial() 
-                print("Conexión exitosa con " + connectPort)
+                #print("Conexión exitosa con " + connectPort)
                 
         def isOpen(ip, port):
             s.settimeout(timeout)
@@ -239,7 +224,21 @@ class StartPage(tk.Frame): # Página de inicio
                             command=lambda: controller.show_frame(PageThree))
         button3.grid(row=2, column=3,sticky="ew") # Fila 1, columna 0
         
-                    
+        
+        def noSerial(): 
+            win = tk.Toplevel()
+            win.title("CABLE USB NO CONECTADO")
+            
+            def winDest():
+                win.destroy()
+                app.destroy()
+            
+            message = "Por favor cerrar la aplicación y conectar cable USB"
+            label = tk.Label(win, text=message,font=SMALL_FONT)
+            label.grid(row=2,column=2)
+            
+            buttonTryAgain = ttk.Button(win, text="Cerrar aplicación", command=winDest)
+            buttonTryAgain.grid(row=3,column=2,sticky="ew")
         
         def succesfulWiFi():
             win = tk.Toplevel()
@@ -295,6 +294,34 @@ class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         label = ttk.Label(self, text="Page One",font=LARGE_FONT)
+        
+        def successParam():
+            win = tk.Toplevel()
+            win.title("PARAMETROS RECIBIDOS")
+            
+            def winDestruccion():
+                win.destroy()
+            
+            message = "Módulo de Estimulación dice: Parámetros Recibidos" 
+            label = tk.Label(win, text=message,font=SMALL_FONT)
+            label.grid(row=2,column=2)
+            
+            buttonSi = ttk.Button(win, text="Cerrar Ventana",command=winDestruccion)
+            buttonSi.grid(row=3,column=2,sticky="ew")
+            
+        def noSuccessParam(): 
+            win = tk.Toplevel()
+            win.title("FALLO EN COMUNICACION RF")
+            
+            def winDestruccion():
+                win.destroy()
+            
+            message = "Módulo de Estimulación dice: Fallo en Recepción de Parámetros" 
+            label = tk.Label(win, text=message,font=SMALL_FONT)
+            label.grid(row=2,column=2)
+            
+            buttonNo = ttk.Button(win, text="Cerrar Ventana",command=winDestruccion)
+            buttonNo.grid(row=3,column=2,sticky="ew")
                     
         def clear_all(): # Funcion para el boton que cierra el puerto y la ventana de
                     # la interfaz grafica
@@ -361,17 +388,36 @@ class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
             elif(op5 == sleepopts[1]):
                 sleep = 2
         
-    
-            ser.write(str(modo).encode()) # Se envia el valor a Arduino
-            ser.write(str(ancho).encode()) # Se envia el valor a Arduino
-            ser.write(str(time).encode()) # Se envia el valor a Arduino
-            ser.write(str(freq).encode()) # Se envia el valor a Arduino
-            ser.write(str(sleep).encode()) # Se envia el valor a Arduino
-    
-            print("Parámetros enviados") # Se muestra en la consola la confirmación del
-                                # envío de parámetros
+            condSend = True
+            contSend = 0
             
-        
+            while(condSend == True): 
+                if(contSend == 0):
+                    ser.write(str(modo).encode()) # Se envia el valor a Arduino
+                elif(contSend == 1):
+                    ser.write(str(ancho).encode()) # Se envia el valor a Arduino
+                elif(contSend == 2):
+                    ser.write(str(time).encode()) # Se envia el valor a Arduino
+                elif(contSend == 3):
+                    ser.write(str(freq).encode()) # Se envia el valor a Arduino
+                elif(contSend == 4):
+                    ser.write(str(sleep).encode()) # Se envia el valor a Arduino
+                
+                elif(contSend == 5):
+                    condSend = False
+                    
+                contSend += 1
+    
+            
+            lec = ser.read()
+            
+            lecInt = int(lec)
+            if(lecInt == 1):
+                successParam()
+            else:
+                noSuccessParam()
+
+                    
         cl1 = tk.StringVar()
         cl1.set(opmodopts[0])
 
@@ -504,12 +550,12 @@ class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
             s.send(freq.encode(encoding='utf_8'))  
             s.send(sleep.encode(encoding='utf_8'))
             
-            print("Parámetros enviados") # Se muestra en la consola la confirmación del
+            #print("Parámetros enviados") # Se muestra en la consola la confirmación del
                                 # envío de parámetros
             
-            condRetWi = True 
+            condRetWi = True # Condición para recibir confirmación del cliente
             
-            while(condRetWi == True):
+            while(condRetWi == True): # Mientras la condición sea True
                 socket_list = [s]
                 
                 rs, ws, es = select.select(socket_list,[],[],0)
@@ -517,8 +563,8 @@ class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
                 for sock in rs: 
                     if sock == s:
                         dataIn = sock.recv(1024)
-                        print("Recibido")
-                        print(dataIn)
+                        #print("Recibido")
+                        #print(dataIn)
                         condRetWi = False
                         
             dataInt = int(dataIn)
@@ -617,11 +663,36 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Page Three",font=LARGE_FONT)
         
+        def is_internet(): # Función para probar conexión a internet
+            try: # Se intenta abrir el url (google es el más simple)
+                urlopen('https://www.google.com', timeout = 1)
+                return True # Si se pudo abrir se regresa True
+            except urllib.error.URLError as Error:
+                return False # Si no se pudo abrir se regresa False
+
+        def try_internet(): # Función para indicar estado de la conexión a internet al usuario           
+            if is_internet(): # Si se pudo abrir el url
+                #print("Conexión a Internet exitosa") # Se muestra conexión exitosa
+                internetTry = 1
+            else: # Si no
+                #print("No está conectado a Internet") # Se muestra conexión fallida
+                internetTry = 0 
+            return internetTry
+        
+        connectTry = try_internet()
+        
         label = tk.Label(self, text="CODIGO",font=LARGE_FONT) # Mensaje de bienvenida
         label.grid(row=0,column=0)
         label2 = tk.Label(self, text="Ingrese el codigo de la Varilla Programadora",font=NORM_FONT)
         # Se pide al usuario seleccionar la opción de conexión: wifi o usb
         label2.grid(row=1,column=0)
+        
+        
+        label3 = tk.Label(self, text= "Estado de la Conexion a la Red: ", font=SMALL_FONT)
+        label3.grid(row=4,column=0)
+        
+        label4 = tk.Label(self, text=" Si el color es rojo, por favor seleccionar opcion para conectar por cable USB", font=SMALL_FONT)
+        label4.grid(row=5,column=0)
         
         global ESP_IP
         #ESP_IP = '192.168.0.19' # Se indica la IP a la que se quiere conectar (la del ESP8266)
@@ -656,7 +727,7 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
             ESP_IP = e.get()
             WiFiConnection = False
             if checkHost(ESP_IP, ESP_PORT):
-                print(ESP_IP + " está activo")
+                #print(ESP_IP + " está activo")
                 WiFiConnection = True
             else:
                 print("Conexión fallida")
@@ -667,12 +738,22 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
                 messageNoWiFi()
             else:
                 succesfulWiFi()
+                
+        if(connectTry == 1):
+            labelSi = tk.Label(self, text="Conectado",font=SMALL_FONT) # Mensaje de bienvenida
+            labelSi.grid(row=4,column=1)
+        else:
+            labelNo = tk.Label(self, text="No conectado",font=SMALL_FONT) # Mensaje de bienvenida
+            labelNo.grid(row=4,column=1)
      
         
         button = ttk.Button(self, text="Conectar por medio de WiFi",
                             command=connectTry)
         #button = ttk.Button(self, text="Conectar por medio de WiFi",command=lambda: controller.show_frame(PageThree))
         button.grid(row=3, column=0,sticky="ew") # Fila 1, columna 0
+        
+        buttonRet = ttk.Button(self, text="Regresar al Menu Principal",command=lambda: controller.show_frame(StartPage))
+        buttonRet.grid(row=6,column=0,sticky="ew")
         
  
         def succesfulWiFi():
