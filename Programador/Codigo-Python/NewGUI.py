@@ -663,36 +663,12 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Page Three",font=LARGE_FONT)
         
-        def is_internet(): # Función para probar conexión a internet
-            try: # Se intenta abrir el url (google es el más simple)
-                urlopen('https://www.google.com', timeout = 1)
-                return True # Si se pudo abrir se regresa True
-            except urllib.error.URLError as Error:
-                return False # Si no se pudo abrir se regresa False
-
-        def try_internet(): # Función para indicar estado de la conexión a internet al usuario           
-            if is_internet(): # Si se pudo abrir el url
-                #print("Conexión a Internet exitosa") # Se muestra conexión exitosa
-                internetTry = 1
-            else: # Si no
-                #print("No está conectado a Internet") # Se muestra conexión fallida
-                internetTry = 0 
-            return internetTry
-        
-        connectTry = try_internet()
-        
+    
         label = tk.Label(self, text="CODIGO",font=LARGE_FONT) # Mensaje de bienvenida
         label.grid(row=0,column=0)
         label2 = tk.Label(self, text="Ingrese el codigo de la Varilla Programadora",font=NORM_FONT)
         # Se pide al usuario seleccionar la opción de conexión: wifi o usb
         label2.grid(row=1,column=0)
-        
-        
-        label3 = tk.Label(self, text= "Estado de la Conexion a la Red: ", font=SMALL_FONT)
-        label3.grid(row=4,column=0)
-        
-        label4 = tk.Label(self, text=" Si el color es rojo, por favor seleccionar opcion para conectar por cable USB", font=SMALL_FONT)
-        label4.grid(row=5,column=0)
         
         global ESP_IP
         #ESP_IP = '192.168.0.19' # Se indica la IP a la que se quiere conectar (la del ESP8266)
@@ -738,18 +714,37 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
                 messageNoWiFi()
             else:
                 succesfulWiFi()
+        
+        def is_internet(): # Función para probar conexión a internet
+            try: # Se intenta abrir el url (google es el más simple)
+                urlopen('https://www.google.com', timeout = 1)
+                return True # Si se pudo abrir se regresa True
+            except urllib.error.URLError as Error:
+                return False # Si no se pudo abrir se regresa False
+
+        def try_internet(): # Función para indicar estado de la conexión a internet al usuario           
+            if is_internet(): # Si se pudo abrir el url
+                #print("Conexión a Internet exitosa") # Se muestra conexión exitosa
+                internetTry = 1
+            else: # Si no
+                #print("No está conectado a Internet") # Se muestra conexión fallida
+                internetTry = 0 
+            return internetTry
+        
+        connectStatus = try_internet()
                 
-        if(connectTry == 1):
-            labelSi = tk.Label(self, text="Conectado",font=SMALL_FONT) # Mensaje de bienvenida
-            labelSi.grid(row=4,column=1)
+        if(connectStatus == 1):
+            labelSi = tk.Label(self, text="Estado de Conexion a la Red: Conectado",fg="green",font=SMALL_FONT) # Mensaje de bienvenida
+            labelSi.grid(row=4,column=0)
         else:
-            labelNo = tk.Label(self, text="No conectado",font=SMALL_FONT) # Mensaje de bienvenida
-            labelNo.grid(row=4,column=1)
-     
+            labelNo = tk.Label(self, text="Estado de Conexion a la Red: No conectado",fg="red",font=SMALL_FONT) # Mensaje de bienvenida
+            labelNo.grid(row=4,column=0)
+             
+        label4 = tk.Label(self, text=" Si el color es rojo, por favor seleccionar opcion para conectar por cable USB", font=SMALL_FONT)
+        label4.grid(row=5,column=0)
         
         button = ttk.Button(self, text="Conectar por medio de WiFi",
                             command=connectTry)
-        #button = ttk.Button(self, text="Conectar por medio de WiFi",command=lambda: controller.show_frame(PageThree))
         button.grid(row=3, column=0,sticky="ew") # Fila 1, columna 0
         
         buttonRet = ttk.Button(self, text="Regresar al Menu Principal",command=lambda: controller.show_frame(StartPage))
@@ -765,7 +760,6 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
             label.grid(row=2,column=2)
             
             buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PageTwo))
-            #buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PagePassword))
             buttonWiFi.grid(row=3,column=2,sticky="ew")
         
         def succesfulSerial():
