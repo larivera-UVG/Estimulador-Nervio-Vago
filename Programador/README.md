@@ -33,6 +33,8 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
     En esta carpeta se almacenan los archivos de Python utilizados para envío de datos por WiFi o por comunicación serial. Se genera una interfaz gráfica simple y amigable para la selección de parámetros de estimulación. 
     
   * [SoftProg](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/SoftProg.py)
+
+      Programa que implementa el software de programación (interfaz gráfica) del Módulo de Programación. 
   
 * [Código de ESP8266/NodeMcu](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266)
   
