@@ -4,6 +4,9 @@
 """
 SoftProg.py
 
+Código que implementa el Software de Programación de la Fase II del Módulo de
+Programación del Sistema VNS UVG
+
 Basado en el código de TutoElectro: Tutorial_ESP8266_Python_1
 Canal de youtube: https://www.youtube.com/c/Tutoelectro1/featured
 
@@ -19,7 +22,7 @@ Ingeniería Mecatrónica - UVG
 # LIBRERIAS UTILIZADAS
 ##############################################################################
 import socket # Librería socket para poder comunicarse con el ESP8266 por medio de WiFi
-import select 
+import select # Librería para monitorear sockets 
 
 import serial # Librería para comunicación serial 
 import serial.tools.list_ports # Módulo para poder ver los puertos seriales
@@ -41,7 +44,7 @@ LARGE_FONT = ("Verdana", 12)
 NORM_FONT = ("Verdana", 10)
 SMALL_FONT = ("Verdana", 8)
 
-# Variables para intento de conexión con el módulo ESP8266
+# Variables para intento de conexión con la varilla programadora por WiFi
 timeout = 3
 retry = 2
 delay = 2
@@ -87,7 +90,7 @@ class VNS(tk.Tk): # Clase principal de la interfaz gráfica, el core de la GUI
         
         self.frames = {}
         
-        # Se declaran la cantidad de páginas (ventanas) diferentes 
+        # Se declaran los nombres de las páginas (ventanas) que se requieren
         for F in (StartPage, PageOne, PageTwo, PageThree):
     
             frame = F(container, self)
@@ -100,7 +103,7 @@ class VNS(tk.Tk): # Clase principal de la interfaz gráfica, el core de la GUI
         self.show_frame(StartPage) # Se muestra la StartPage al iniciar
         
         
-    def show_frame(self, cont):
+    def show_frame(self, cont): # Funcion para mostrar la página deseada 
         
         frame = self.frames[cont]
         frame.tkraise()
@@ -113,11 +116,11 @@ class StartPage(tk.Frame): # Página de inicio
         
         label = tk.Label(self, text="BIENVENIDO",font=LARGE_FONT) # Mensaje de bienvenida
         label.grid(row=0,column=3)
+        
         # Se pide al usuario seleccionar la opción de conexión: wifi o usb
         label2 = tk.Label(self, text="Por favor seleccionar una opcion de conexion",font=NORM_FONT)
         label2.grid(row=1,column=3)
         
-                
         def get_ports(): # Función para ver los puertos activos
             ports = serial.tools.list_ports.comports() # Ports guarda la lista de puertos
             # activos
@@ -125,7 +128,7 @@ class StartPage(tk.Frame): # Página de inicio
 
         foundPorts = get_ports() # Se obtienen los puertos disponibles
         
-        def findArduino(portsFound): # Funcion para buscar al Arduino en los puertos
+        def findArduino(portsFound): # Funcion para buscar la varilla programadora en los puertos
             commPort = 'None' # Condicion para errores
             numConnection = len(portsFound) # Numero de puertos activos 
     
@@ -158,6 +161,7 @@ class StartPage(tk.Frame): # Página de inicio
                 ser = serial.Serial(connectPort, 115200) # Se conecta a éste
                 succesfulSerial() 
                 
+                '''
         def isOpen(ip, port):
             s.settimeout(timeout)
             try:
@@ -190,32 +194,38 @@ class StartPage(tk.Frame): # Página de inicio
                 messageNoWiFi()
             else:
                 succesfulWiFi()
+                '''
      
+        # Boton para intenter comunicacion por cable USB
         button2 = ttk.Button(self, text="Conectar por medio de cable USB",
                             command=autoPorts)
         button2.grid(row=3, column=3,sticky="ew") # Fila 1, columna 0
         
+        # Boton para intentar comunicacion por WiFi
         button3 = ttk.Button(self, text="Conectar por medio de WiFi",
                             command=lambda: controller.show_frame(PageThree))
         button3.grid(row=2, column=3,sticky="ew") # Fila 1, columna 0
         
         
-        def noSerial(): 
+        def noSerial(): # Funcion para mostrar ventana de fallo de conexion por cable USB
             win = tk.Toplevel()
-            win.title("CABLE USB NO CONECTADO")
+            win.title("CABLE USB NO CONECTADO") 
             
-            def winDest():
+            def winDest(): # Funcion para cerrar la ventana y la app
                 win.destroy()
                 app.destroy()
             
+            # Mensaje que aparece en la ventana
             message = "Por favor cerrar la aplicacion y conectar cable USB"
             label = tk.Label(win, text=message,font=SMALL_FONT)
             label.grid(row=2,column=2)
             
+            # Boton para cerrar la aplicacion
             buttonTryAgain = ttk.Button(win, text="Cerrar aplicacion", command=winDest)
             buttonTryAgain.grid(row=3,column=2,sticky="ew")
         
-        def succesfulWiFi():
+        '''
+        def succesfulWiFi(): # Funcion que muestra conexion exitosa por WiFi
             win = tk.Toplevel()
             win.title("CONEXION POR WIFI EXITOSA")
             
@@ -226,18 +236,21 @@ class StartPage(tk.Frame): # Página de inicio
             buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PageTwo))
             #buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PagePassword))
             buttonWiFi.grid(row=3,column=2,sticky="ew")
+        '''
         
-        def succesfulSerial():
+        def succesfulSerial(): # Funcion que muestra ventana de conexion exitosa por USB
             win = tk.Toplevel()
             win.title("CONEXION POR USB EXITOSA")
             
-            message = "Se ha logrado la comunicación por cable USB"
+            message = "Se ha logrado la comunicacion por cable USB"
             label = tk.Label(win, text=message,font=NORM_FONT)
             label.grid(row=2,column=2)
             
-            buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PageOne))
+            # Boton que lleva a la seleccion de parametros
+            buttonWiFi = ttk.Button(win, text="Ir a la seleccion de parametros",command=lambda: controller.show_frame(PageOne))
             buttonWiFi.grid(row=3,column=2,sticky="ew")
             
+            '''
         def messageNoWiFi():
             win = tk.Toplevel()
             win.title('ERROR: SIN WIFI')
@@ -261,7 +274,7 @@ class StartPage(tk.Frame): # Página de inicio
             
             buttonSalir = ttk.Button(win, text="Salir de la aplicación", command=destroyAll)
             buttonSalir.grid(row=3,column=0,sticky="ew")
-            
+            '''
             
 class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
     
@@ -270,28 +283,28 @@ class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
         label = ttk.Label(self, text="Page One",font=LARGE_FONT)
         
         
-        def successParam():
+        def successParam(): # Funcion que muestra ventana de programacion exitosa
             win = tk.Toplevel()
             win.title("PARAMETROS RECIBIDOS")
             
             def winDestruccion():
                 win.destroy()
             
-            message = "Módulo de Estimulación dice: Parámetros Recibidos" 
+            message = "Modulo de Estimulacion dice: Parametros Recibidos" 
             label = tk.Label(win, text=message,font=SMALL_FONT)
             label.grid(row=2,column=2)
             
             buttonSi = ttk.Button(win, text="Cerrar Ventana",command=winDestruccion)
             buttonSi.grid(row=3,column=2,sticky="ew")
             
-        def noSuccessParam(): 
+        def noSuccessParam(): # Funcion que muestra ventana de programacion fallida
             win = tk.Toplevel()
             win.title("FALLO EN COMUNICACION RF")
             
             def winDestruccion():
                 win.destroy()
             
-            message = "Módulo de Estimulación dice: Fallo en Recepción de Parámetros" 
+            message = "Modulo de Estimulacion dice: Fallo en Recepcion de Parametros" 
             label = tk.Label(win, text=message,font=SMALL_FONT)
             label.grid(row=2,column=2)
             
@@ -366,7 +379,7 @@ class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
             condSend = True
             contSend = 0
             
-            while(condSend == True): 
+            while(condSend == True): # Se envían los 5 parámetros
                 if(contSend == 0):
                     ser.write(str(modo).encode()) # Se envia el valor a Arduino
                 elif(contSend == 1):
@@ -384,13 +397,13 @@ class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
                 contSend += 1
     
             
-            lec = ser.read()
+            lec = ser.read() # Se lee el puerto serial 
             
-            lecInt = int(lec)
-            if(lecInt == 1):
-                successParam()
-            else:
-                noSuccessParam()
+            lecInt = int(lec) # Se convierte la lectura a entero 
+            if(lecInt == 1): # Si la lectura es 1
+                successParam() # Se logró la programación
+            else: # Si no
+                noSuccessParam() # No se logró la programación 
 
                     
         cl1 = tk.StringVar()
@@ -528,14 +541,14 @@ class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
             condRetWi = True # Condición para recibir confirmación del cliente
             
             while(condRetWi == True): # Mientras la condición sea True
-                socket_list = [s]
+                socket_list = [s] 
                 
-                rs, ws, es = select.select(socket_list,[],[],0)
+                rs, ws, es = select.select(socket_list,[],[],0) # El socket se quiere leer 
                 
                 for sock in rs: 
-                    if sock == s:
-                        dataIn = sock.recv(1024)
-                        condRetWi = False
+                    if sock == s: # Si el contador esta el socket 
+                        dataIn = sock.recv(1024) # Se lee el socket, valor de 8 bits
+                        condRetWi = False # Se sale del while
                         
             dataInt = int(dataIn)
             if(dataInt == 1):
@@ -649,8 +662,8 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Creación del objeto socket
 
 
-        def isOpen(ip, port):
-            s.settimeout(timeout)
+        def isOpen(ip, port): #Funcion para ver si el puerto esta abierto 
+            s.settimeout(timeout) # Timeout de 
             try:
                 s.connect((ip, int(port)))
                 return True
