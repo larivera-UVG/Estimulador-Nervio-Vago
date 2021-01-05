@@ -24,9 +24,9 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
 
   En esta carpeta se encuentran los archivos utilizados para simulación del Módulo de Estimulación. Los archivos de Arduino deben ir en carpetas de su mismo nombre y     por eso los archivos están en carpetas distintas dentro de ésta. 
 
-  * [NMRecRF](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/NMRecRF)
+  * [StimModProg](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/StimModProg)
 
-      Archivo utilizado para recibir datos por RF, utilizando el módulo de 433 MHz, e imprimirlos en el monitor serial para verificación.
+      Archivo utilizado para recibir datos por RF, utilizando el módulo nRF24L01+. Simulación del Módulo de Estimulación. 
         
 * [Código de Python](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python.py)
 
@@ -69,4 +69,4 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
 
   * [Conexión RF24-Arduino Uno](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/blob/master/Programador/Esquem%C3%A1ticos/nRF24Arduino.PNG)
   
-      Placa para el módulo SPSGRF. [Fuente](https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4)
+      Esquemático de conexión entre módulo nRF24L01+ y Arduino Uno. [Fuente](https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4)
