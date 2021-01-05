@@ -23,3 +23,7 @@
 - Se eliminaron los archivos PyComTry, PythonReadTry, RFReceiveTry y RFSendTry, ya que no son relevantes para el prototipo actual. 
 - NMRecRF.ino: código para el receptor de 433 MHz. El módulo receptor RF, conectado a un Arduino Uno, recibe los parámetros de estimulación y muestra en el monitor serial los parámetros recibidos.
 - SPITry: carpeta con la librería para uso del módulo SPSGRF-868. El código para el receptor y el transmisor tienen la misma base debido a que ambos módulos funcionan para ambos casos. 
+
+## Actualización 5 de enero 2021
+- Se eliminaron los archivos NMRecRF y SPITry
+- Se añadió el archivo StimModProg. Implementa el controlador receptor del módulo de programación. 
