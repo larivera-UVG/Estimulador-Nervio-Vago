@@ -34,7 +34,7 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
     
   * [SoftProg](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/SoftProg.py)
   
-* [Código de ESP8266](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266)
+* [Código de ESP8266/NodeMcu](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266)
   
     En esta carpeta se almacenan los archivos de Arduino utilizados para pruebas con el ESP8266. Debido a que se programa desde el IDE de Arduino, los archivos deben en ir en una carpeta con el mismo nombre.
     
@@ -63,10 +63,10 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
 
     En esta carpeta se encuentran los archivos Altium utilizados para simulación de circuitos y creación de PCBs.
     
-  * [Esquemático SPSGRF](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos/SPSGRFSheet.SchDoc)
+  * [Conexión RF24-NodeMCU](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/blob/master/Programador/Esquem%C3%A1ticos/nRF24NodeMCU.PNG)
   
-      Esquemático de conexión para la placa SPSGRF. 
+      Esquemático de conexión entre módulo nRF24L01+ y NodeMCU. Omitir DHT11 (sensor de temperatura y humedad). [Fuente](https://how2electronics.com/esp8266-nrf24l01-gateway-arduino-node/)
 
-  * [Placa SPSGRF](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos/SPSGRFpcb.PcbDoc)
+  * [Conexión RF24-Arduino Uno](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/blob/master/Programador/Esquem%C3%A1ticos/nRF24Arduino.PNG)
   
-      Placa para el módulo SPSGRF. 
+      Placa para el módulo SPSGRF. [Fuente](https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4)
