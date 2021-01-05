@@ -11,7 +11,7 @@ El Módulo de Estimulación se implanta en el área pectoral y, mediante un cabl
 ### Módulo Programador
 El Módulo Programador sirve para poder comunicar las parámetros de estimulación (corriente de estimulación, tiempo de encendido y apagado, frecuencia de estimulación y ancho de pulso) al Módulo Estimulador. Estos parámetros se programan de forma inalámbrica utilizando módulos de comunicación por radiofrecuencia (RF). Para la programación inalámbrica de los parámetros se utiliza una varilla programadora a la cual se le cargan los parámetros de estimulación por medio de una aplicación (interfaz gráfica) para Windows programada en Python. Esta interfaz gráfica es amigable y fácil de usar para que el personal médico no tenga problemas al utilizarla. La interfaz gráfica puede cargar los parámetros a la varilla por medio de WiFi, y si la conexión no es posible, se puede conectar la varilla a la PC por medio de cable USB para la carga de parámetros. 
 
-![Diagrama de Funcionamiento](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Imágenes/Prototipo3.png)
+![Diagrama de Funcionamiento](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/blob/master/Programador/Im%C3%A1genes/Prototipo%20nRF24L.png)
 
 En este módulo se utilizó el ESP8266 como controlador de la varilla progamadora, para comunicarse con la aplicación de Python, por medio de WiFi o por comunicación serial y  Arduino Uno como simulación del controlador del Módulo Estimulador.
 
@@ -27,11 +27,7 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
   * [NMRecRF](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/NMRecRF)
 
       Archivo utilizado para recibir datos por RF, utilizando el módulo de 433 MHz, e imprimirlos en el monitor serial para verificación.
-      
-  * [SPITry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Arduino/SPITry)
-  
-      Carpeta que implementa la librería para usar el módulo SPSGRF-868 como receptor o como transmisor. 
-  
+        
 * [Código de Python](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python.py)
 
     En esta carpeta se almacenan los archivos de Python utilizados para envío de datos por WiFi o por comunicación serial. Se genera una interfaz gráfica simple y amigable para la selección de parámetros de estimulación. 
