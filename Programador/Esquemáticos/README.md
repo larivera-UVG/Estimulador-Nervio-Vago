@@ -12,5 +12,5 @@
 ## Actualización 5 de enero 2021
 - Se eliminaron los esquemáticos y diseños de PCB de los módulos de SPSGRF(C)-868. 
 - Se añadieron esquemáticos de conexión entre controladores y módulos RF.
-- [Fuente RF24-Arduino](https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4)
+- [Fuente RF24-Arduino](https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4). Los pines CE y CSN se pueden cambiar en el código de la varilla programadora. 
 - [Fuente RF24-NodeMCU](https://how2electronics.com/esp8266-nrf24l01-gateway-arduino-node/)
