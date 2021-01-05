@@ -36,19 +36,15 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
 
     En esta carpeta se almacenan los archivos de Python utilizados para envío de datos por WiFi o por comunicación serial. Se genera una interfaz gráfica simple y amigable para la selección de parámetros de estimulación. 
     
-  * [NewGUI](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/NewGUI.py)
+  * [SoftProg](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-Python/SoftProg.py)
   
 * [Código de ESP8266](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266)
   
     En esta carpeta se almacenan los archivos de Arduino utilizados para pruebas con el ESP8266. Debido a que se programa desde el IDE de Arduino, los archivos deben en ir en una carpeta con el mismo nombre.
     
-  * [ESPAll](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/ESPAll)
+  * [VarProgCode](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/VarProgCode)
   
-      Archivo para comunicarse con la PC por medio de WiFi o por comunicación serial. 
-
-  * [SPITry](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Codigo-ESP8266/SPITry)
-  
-      Carpeta que implementa la librería para usar el módulo SPSGRF-868 como receptor o como transmisor.
+      Carepta con código de la varilla programadora para usarse con el módulo nRF24L01+ y la librería [RF24](http://tmrh20.github.io/RF24/index.html).
 
 * [Documentación](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación)
 
@@ -62,13 +58,9 @@ En el siguiente [enlace](https://github.com/larivera-UVG/Estimulador-Nervio-Vago
       
       Manual para el uso del Módulo de Programación.
 
-  * [Datasheet SPSGRF](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación/SPSGRF.pdf)
+  * [Datasheet nRF24L01+](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación/nRF24L01DataSheet.pdf)
       
-      Hoja de datos del módulo RF utilizado en este proyecto. 
-
-  * [Datasheet SPIRIT1](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Documentación/Tesis%20Miguel%20Alvarez.pdf)
-      
-      Hoja de datos del transreceptor sub-1GHZ que contiene el módulo SPSGRF. 
+      Hoja de datos del transceptor nRF24L01+. 
 
   
 * [Esquemáticos](https://github.com/larivera-UVG/Estimulador-Nervio-Vago/tree/master/Programador/Esquemáticos)
