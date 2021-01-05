@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 """
-NewGUI.py
+SoftProg.py
 
 Basado en el código de TutoElectro: Tutorial_ESP8266_Python_1
 Canal de youtube: https://www.youtube.com/c/Tutoelectro1/featured
@@ -19,7 +19,7 @@ Ingeniería Mecatrónica - UVG
 # LIBRERIAS UTILIZADAS
 ##############################################################################
 import socket # Librería socket para poder comunicarse con el ESP8266 por medio de WiFi
-import select
+import select 
 
 import serial # Librería para comunicación serial 
 import serial.tools.list_ports # Módulo para poder ver los puertos seriales
@@ -64,7 +64,7 @@ class VNS(tk.Tk): # Clase principal de la interfaz gráfica, el core de la GUI
     
     def __init__(self, *args, **kwargs):
         
-        tk.Tk.__init__(self, *args, **kwargs)
+        tk.Tk.__init__(self, *args, **kwargs) 
         
         #tk.Tk.iconbitmap(self,"IconoUVG.ico") # Se coloca el icono de la UVG en la interfaz
         tk.Tk.wm_title(self,"Sistema VNS - UVG") # Se coloca el título a la interfaz
@@ -74,7 +74,9 @@ class VNS(tk.Tk): # Clase principal de la interfaz gráfica, el core de la GUI
         container.pack(side="top",fill="both",expand = True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
-                
+        
+        
+        # CODIGO PARA CREAR PESTAÑAS, UN MENUBAR        
         #menubar = tk.Menu(container)
         #filemenu = tk.Menu(menubar, tearoff=0)
         #filemenu.add_command(label="Save settings", command = lambda: popupmsg("Not supported"))
@@ -115,17 +117,7 @@ class StartPage(tk.Frame): # Página de inicio
         label2 = tk.Label(self, text="Por favor seleccionar una opcion de conexion",font=NORM_FONT)
         label2.grid(row=1,column=3)
         
-        
-        #global ESP_IP
-        #ESP_IP = '192.168.0.19' # Se indica la IP a la que se quiere conectar (la del ESP8266)
-        #ESP_IP = input("Ingrese IP: ")
-
-        #global ESP_PORT
-        #ESP_PORT = 8266 # Puerto en el que se abrirá la comunicación
-
-        #global s
-        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Creación del objeto socket
-        
+                
         def get_ports(): # Función para ver los puertos activos
             ports = serial.tools.list_ports.comports() # Ports guarda la lista de puertos
             # activos
@@ -157,25 +149,14 @@ class StartPage(tk.Frame): # Página de inicio
             foundPorts = get_ports()
             connectPort = findArduino(foundPorts) # Se busca el puerto del Arduino
 
-            #print("Intentando conectar con ESP8266 USB")
-    
-            #while(connectPort == 'None'): # Si no se puede conectar con el ESP8266
             if(connectPort == 'None'):
-                #print("Conexión fallida. Revisar la conexión.")
-                #print("")
-                #time.sleep(2) # Se intenta conectar otra vez a los dos segundos
                 noSerial()
-                
-                #foundPorts = get_ports() # Se obtienen los puertos disponibles
-                #connectPort = findArduino(foundPorts) # Se busca el puerto del Arduino
-                #print("Intentado conectar con ESP8266 USB")
-    
+                    
             if connectPort != 'None': # Si se encontró el puerto
                 comUSB = 1
                 global ser
                 ser = serial.Serial(connectPort, 115200) # Se conecta a éste
                 succesfulSerial() 
-                #print("Conexión exitosa con " + connectPort)
                 
         def isOpen(ip, port):
             s.settimeout(timeout)
@@ -275,7 +256,6 @@ class StartPage(tk.Frame): # Página de inicio
             
             label2 = tk.Label(win, text=message2,font=NORM_FONT)
             label2.grid(row=1,column=0)
-            #Label(win, text=message).pack()
             buttonUSB = ttk.Button(win, text="Por favor, seleccionar la opción para conexión por cable USB",command=popupWiFi)
             buttonUSB.grid(row=2,column=0,sticky="ew")
             
@@ -571,9 +551,6 @@ class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
             def winDestruccion():
                 win.destroy()
                             
-            #labelCont = tk.Label(win,text=cW,font=SMALL_FONT)
-            #labelCont.grid(row=4,column=2)
-            
             message = "Modulo de Estimulacion dice: Parametros Recibidos" 
             label = tk.Label(win, text=message,font=SMALL_FONT)
             label.grid(row=2,column=2)
@@ -664,8 +641,6 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
         label2.grid(row=1,column=0)
         
         global ESP_IP
-        #ESP_IP = '192.168.0.19' # Se indica la IP a la que se quiere conectar (la del ESP8266)
-        #ESP_IP = input("Ingrese IP: ")
 
         global ESP_PORT
         ESP_PORT = 8266 # Puerto en el que se abrirá la comunicación
@@ -696,11 +671,8 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
             ESP_IP = e.get()
             WiFiConnection = False
             if checkHost(ESP_IP, ESP_PORT):
-                #print(ESP_IP + " está activo")
                 WiFiConnection = True
             else:
-                print("Conexión fallida")
-                print("Por favor conectar cable USB")
                 WiFiConnection = False
 
             if(WiFiConnection == False):
@@ -717,10 +689,8 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
 
         def try_internet(): # Función para indicar estado de la conexión a internet al usuario           
             if is_internet(): # Si se pudo abrir el url
-                #print("Conexión a Internet exitosa") # Se muestra conexión exitosa
                 internetTry = 1
             else: # Si no
-                #print("No está conectado a Internet") # Se muestra conexión fallida
                 internetTry = 0 
             return internetTry
         
@@ -785,7 +755,6 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
             
             label2 = tk.Label(win, text=message2,font=NORM_FONT)
             label2.grid(row=1,column=0)
-            #Label(win, text=message).pack()
             buttonUSB = ttk.Button(win, text="Regresar al Menu Principal",command=lambda: controller.show_frame(StartPage))
             buttonUSB.grid(row=2,column=0,sticky="ew")
             
