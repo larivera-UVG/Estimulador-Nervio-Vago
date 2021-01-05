@@ -14,3 +14,7 @@
 - Se eliminaron los archivos NMTrnsmRF y ESPInt, ya que no son relevantes para el prototipo actual. 
 - Se movió el archivo NMRecRF a la carpeta de Código-Arduino. 
 - Se agregó la carpeta SPITry, con el código para implementación del módulo SPSGRF-868. 
+
+## Actualización 5 de enero 2021
+- Se eliminaron las carpetas ESPAll, nRFTry y SPITry. 
+- Se agregó la carpeta VarProgCode, que implementa el código para la varilla programadora con el módulo nRF24L01+. 

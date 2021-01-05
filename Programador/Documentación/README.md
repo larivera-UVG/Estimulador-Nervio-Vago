@@ -35,7 +35,7 @@
 - SPSGRF.pdf: hoja de datos del módulo RF SPSGRF
 - spirit1.pdf: hoja de datos del módulo SPIRIT1, utilizado por el módulo SPSGRF
 
-### Nueva documentación añadida - 5 de enero 2021
+## Actualización 5 de enero 2021
 - Se elimina la documentación del módulo SPSGRF, ya que este no se utilizó. 
 - Se añadió la hoja de datos del módulo nRF24L01+ 
 - La librería de Arduino IDE utilizada para el manejo del módulo RF se encuentra en el link de abajo: 
