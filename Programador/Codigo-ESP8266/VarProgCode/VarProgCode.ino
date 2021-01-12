@@ -1,17 +1,17 @@
 /* VarProgCode.ino
- * 
- * Código que implementa la varilla programadora del
- * Módulo de Programación del Sistema VNS UVG
- * 
- * Basado en el código de Aqib: nRF24L01 Interfacing with Arduino | Wireless Communication
- * Link: https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4
- * 
- * Y también en el código de TutoElectro: Tutorial_ESP8266_Python 
- * Canal de youtube: https://www.youtube.com/c/Tutoelectro1/featured
- * 
- * Miguel Alfonso Alvarez Sierra - 16168 
- * Ingeniería Mecatrónica - UVG
- */
+* 
+* Código que implementa la varilla programadora del
+* Módulo de Programación del Sistema VNS UVG
+* 
+* Basado en el código de Aqib: nRF24L01 Interfacing with Arduino | Wireless Communication
+* Link: https://create.arduino.cc/projecthub/muhammad-aqib/nrf24l01-interfacing-with-arduino-wireless-communication-0c13d4
+* 
+* Y también en el código de TutoElectro: Tutorial_ESP8266_Python 
+* Canal de youtube: https://www.youtube.com/c/Tutoelectro1/featured
+* 
+* Miguel Alfonso Alvarez Sierra - 16168 
+* Ingeniería Mecatrónica - UVG
+*/
 
 #include <ESP8266WiFi.h> // Librería para WiFi con ESP8266
 #include <WiFiClient.h> // Librería para poder usar ESP8266 como cliente con protocolo TCP
@@ -38,7 +38,7 @@ byte freqsleep[2];
 int wifiFlag = 0; // Bandera que indica si el ESP8266 se pudo conectar a la red WiFi
 int cont = 0; // Contador de parámetros para la comunicación por WiFi
  
-RF24 radio(2, 4); // Instancia del módulo RF. CE = pin D2, CSN = pin D4
+RF24 radio(2, 4); // Se instancia el módulo RF. CE = D2, CSN = D4
 
 const byte addresses[][6] = {"00001","00002"}; // Direcciones de escritura y lectura. Pensar en ellos más como canales que "nombre" del dispositivo
 
@@ -62,11 +62,13 @@ void setup() {
   lcd.clear(); // Se borra la pantalla para que inice limpia 
 
   radio.begin(); // Se inicializa el módulo RF
+  radio.setAutoAck(1); // Se asegura que el auto ACK esté activo
   radio.setChannel(110); // Se declara el canal de uso, 2510 MHz
   radio.openWritingPipe(addresses[1]); // Dirección 1 para escribir
   radio.openReadingPipe(1, addresses[0]); // Dirección 0 para leer
   radio.setDataRate(RF24_250KBPS); // Tasa de datos de 250 kbs
   radio.setPALevel(RF24_PA_MIN); // PA power al mínimo, -18 dBm
+
   
   WiFi.begin(ssid, password); // Se intenta conectar a la red WiFi establecida
 
@@ -244,7 +246,7 @@ void loop() {
         dataBus[5] = 1; // Bit que le indica al receptor que ya puede enviar la confirmación
 
         delay(5);
-        //unsigned long start_timer = micros(); 
+        unsigned long start_timer = micros(); 
         radio.stopListening(); // Módulo RF como transmisor
         radio.write(&dataBus, sizeof(dataBus)); // Se escribe el bit de datos con su respectivo tamaño
         delay(5);
@@ -252,10 +254,10 @@ void loop() {
         radio.startListening(); // Módulo RF como receptor
         while(!radio.available()); // Si hay datos disponibles en el pipe
         radio.read(&dataConf, sizeof(dataConf)); // Se leen los datos y se almacenan en la confirmación
-        //unsigned long end_timer = micros(); 
+        unsigned long end_timer = micros(); 
         //Serial.println(dataConf[0]); 
-        //Serial.print("Transmission Time (us): ");
-        //Serial.println(end_timer - start_timer); 
+        Serial.print("Transmission Time (us): ");
+        Serial.println(end_timer - start_timer); 
 
         if(dataConf[0] == 1) // Si la confirmación es 1
         {
@@ -424,6 +426,7 @@ void loop() {
       dataBus[5] = 1;
 
       delay(5);
+      //unsigned long start_timer = micros(); 
       radio.stopListening();  
       radio.write(&dataBus, sizeof(dataBus)); 
       delay(5);
@@ -445,3 +448,4 @@ void loop() {
     }
   }
 }
+

@@ -52,11 +52,18 @@ delay = 2
 comUSB = 0 # Confirmación de comunicación con USB
 
 # Listas que incluyen las opciones programables de los parámetros de estimulación
-anchopts = ["250\u03BCs", "500\u03BCs", "25%", "50%", "75%"]
+#anchopts = ["250\u03BCs", "500\u03BCs", "25%", "50%", "75%"]
+#freqopts = ["490.20 Hz", "30.64 Hz", "122.50 Hz", "245.10 Hz", 
+#           "980.39 Hz", "3921.16 Hz", "31372.55 Hz", "Frecuencia 8"]
+#opmodopts = ["Estimulacion", "Programacion", "Reposo"]
+#timeopts = ["30 s", "60 s", "Tiempo 3", "Tiempo 4", "Tiempo 5"]
+#sleepopts = ["5 min", "NO"]
+
+anchopts = ["250 \u03BCs", "500 \u03BCs"]
 freqopts = ["490.20 Hz", "30.64 Hz", "122.50 Hz", "245.10 Hz", 
-            "980.39 Hz", "3921.16 Hz", "31372.55 Hz", "Frecuencia 8"]
-opmodopts = ["Estimulacion", "Programacion", "Reposo"]
-timeopts = ["30 s", "60 s", "Tiempo 3", "Tiempo 4", "Tiempo 5"]
+           "980.39 Hz", "3921.16 Hz", "31372.55 Hz"]
+opmodopts = ["0.25 mA", "0.5 mA", "0.75mA"]
+timeopts = ["30 s", "60 s"]
 sleepopts = ["5 min", "NO"]
 
 ##############################################################################
@@ -161,7 +168,6 @@ class StartPage(tk.Frame): # Página de inicio
                 ser = serial.Serial(connectPort, 115200) # Se conecta a éste
                 succesfulSerial() 
                 
-                '''
         def isOpen(ip, port):
             s.settimeout(timeout)
             try:
@@ -194,7 +200,6 @@ class StartPage(tk.Frame): # Página de inicio
                 messageNoWiFi()
             else:
                 succesfulWiFi()
-                '''
      
         # Boton para intenter comunicacion por cable USB
         button2 = ttk.Button(self, text="Conectar por medio de cable USB",
@@ -224,7 +229,6 @@ class StartPage(tk.Frame): # Página de inicio
             buttonTryAgain = ttk.Button(win, text="Cerrar aplicacion", command=winDest)
             buttonTryAgain.grid(row=3,column=2,sticky="ew")
         
-        '''
         def succesfulWiFi(): # Funcion que muestra conexion exitosa por WiFi
             win = tk.Toplevel()
             win.title("CONEXION POR WIFI EXITOSA")
@@ -236,7 +240,6 @@ class StartPage(tk.Frame): # Página de inicio
             buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PageTwo))
             #buttonWiFi = ttk.Button(win, text="Ir a la selección de parámetros",command=lambda: controller.show_frame(PagePassword))
             buttonWiFi.grid(row=3,column=2,sticky="ew")
-        '''
         
         def succesfulSerial(): # Funcion que muestra ventana de conexion exitosa por USB
             win = tk.Toplevel()
@@ -250,7 +253,6 @@ class StartPage(tk.Frame): # Página de inicio
             buttonWiFi = ttk.Button(win, text="Ir a la seleccion de parametros",command=lambda: controller.show_frame(PageOne))
             buttonWiFi.grid(row=3,column=2,sticky="ew")
             
-            '''
         def messageNoWiFi():
             win = tk.Toplevel()
             win.title('ERROR: SIN WIFI')
@@ -274,7 +276,6 @@ class StartPage(tk.Frame): # Página de inicio
             
             buttonSalir = ttk.Button(win, text="Salir de la aplicación", command=destroyAll)
             buttonSalir.grid(row=3,column=0,sticky="ew")
-            '''
             
 class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
     
@@ -438,7 +439,7 @@ class PageOne(tk.Frame): #PAGINA PARA PARAMETROS POR SERIAL
         drop5 = tk.OptionMenu(self,cl5,*sleepopts)
         drop5.grid(row=5, column=1,sticky="ew")
 
-        label1 = tk.Label(self, text = "Modo de Operación: ")
+        label1 = tk.Label(self, text = "Corriente: ")
         label2 = tk.Label(self, text = "Ancho de pulso: ")
         label3 = tk.Label(self, text = "Tiempo: ")
         label4 = tk.Label(self, text = "Frecuencia: ")
@@ -618,7 +619,7 @@ class PageTwo(tk.Frame): # PAGINA PARA PARAMETROS POR WIFI
         drop5 = tk.OptionMenu(self,cl5,*sleepopts)
         drop5.grid(row=5, column=1,sticky="ew")
 
-        label1 = tk.Label(self, text = "Modo de Operación: ")
+        label1 = tk.Label(self, text = "Corriente: ")
         label2 = tk.Label(self, text = "Ancho de pulso: ")
         label3 = tk.Label(self, text = "Tiempo: ")
         label4 = tk.Label(self, text = "Frecuencia: ")
@@ -761,7 +762,7 @@ class PageThree(tk.Frame): # PAGINA PARA INGRESAR CODIGO IP DE LA VARILLA
                 win.destroy()
                 app.destroy()
     
-            message = "No se pudo conectar con ESP8266 por medio de WiFi." 
+            message = "No se pudo conectar con Varilla Programadora por medio de WiFi." 
             message2 = "Conectar cable USB."
             label = tk.Label(win, text=message,font=NORM_FONT)
             label.grid(row=0,column=0)
